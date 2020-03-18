@@ -3,10 +3,9 @@ const path = require('path')
 const url = require('url');
 
 export class ElectronApp {
-    constructor() {
-        this.app_ = null;
-        this.mainWindow_ = null;
-    }
+    private mainWindow_;
+    private app_;
+
 
     init() {
         this.app_ = electron.app;
