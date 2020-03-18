@@ -6,7 +6,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const TerserJSPlugin = require('terser-webpack-plugin');
 const webpack = require('webpack');
-const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
+// const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 
 
 const isDev = process.env.NODE_ENV === 'development';
@@ -147,7 +147,7 @@ module.exports = [{
         extensions: ['.js', '.ts', '.vue']
     },
     plugins: [
-        new VuetifyLoaderPlugin(),
+        // new VuetifyLoaderPlugin(),
         new webpack.HashedModuleIdsPlugin(),
         new VueLoaderPlugin(),
         new HtmlWebpackPlugin({
