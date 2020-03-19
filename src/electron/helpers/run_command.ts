@@ -17,7 +17,9 @@ export class CommandRunner {
             this.onResolve_ = res;
             this.onReject_ = rej;
             this.childProcess_ = spawn(this.cmdString, {
-                detached: true
+                detached: true,
+                stdio: 'pipe',
+                shell: true
             });
             //exec(this.cmdString);
             this.childProcess_.stdout.on('data', (data) => {
@@ -26,7 +28,7 @@ export class CommandRunner {
             this.childProcess_.stderr.on('data', (data) => {
                 this.event.emit("error", data.toString())
             });
-            this.childProcess_.on("error", function (err) {
+            this.childProcess_.on("error", (err) => {
                 rej(err);
             })
             this.childProcess_.on('exit', (code) => {
