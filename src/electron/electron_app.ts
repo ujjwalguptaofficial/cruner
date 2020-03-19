@@ -14,7 +14,7 @@ export class ElectronApp {
         // This method will be called when Electron has finished
         // initialization and is ready to create browser windows.
         // Some APIs can only be used after this event occurs.
-        this.app_.on('ready', this.createWindow_.bind(this))
+        this.app_.on('ready', this.onReady.bind(this))
 
         // Quit when all windows are closed.
         this.app_.on('window-all-closed', () => {
@@ -33,6 +33,18 @@ export class ElectronApp {
             }
         })
 
+    }
+
+    async onReady() {
+        this.createWindow_();
+        const homeDir = require('os').homedir();
+        // console.log("homeDir", homeDir)
+        await runCommand(`cd ${homeDir}`, (msg) => {
+            console.log(msg);
+        }, err => {
+            console.log(err);
+        })
+        // console.log("homeDir", homeDir)
     }
 
     createWindow_() {
