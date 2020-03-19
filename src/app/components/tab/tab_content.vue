@@ -5,7 +5,7 @@
       <div
         ref="textCmd"
         v-on:keydown.enter.prevent="onEnter"
-        :contenteditable="line===lines && isCommandFinished"
+        :contenteditable="line===lines"
         class="b-tab_content__text-area"
         v-focus-on-create
       ></div>
@@ -56,10 +56,14 @@ export default Vue.extend({
       return this.linesWithoutSymbol.indexOf(val) < 0;
     },
     onCtrlC(e) {
-      if (this.isCommandFinished === true) {
-        console.log("copied");
-      } else {
+      // console.log("copied");
+      if (this.isCommandFinished === false) {
         e.preventDefault();
+        ipcRenderer.send(IPC_EVENTS.KillCommand, {
+          tabId: this.id
+        } as EventExistPayload);
+        this.addMessage("ctrl+c");
+        // console.log("sent kill");
       }
     },
     onEnter() {
@@ -100,7 +104,7 @@ export default Vue.extend({
     },
     executeCommandFinishedCallBack(event, result) {
       this.isCommandFinished = true;
-      console.log(result);
+      // console.log(result);
     }
   },
   mounted() {

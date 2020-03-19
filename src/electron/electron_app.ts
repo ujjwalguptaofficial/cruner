@@ -8,7 +8,10 @@ export class ElectronApp {
     private mainWindow_;
     private app_;
 
-    private cmdEventsList_ = [];
+    private cmdEventsList_: {
+        tabId: string,
+        process: CommandRunner
+    }[] = [];
 
     init() {
         this.app_ = electron.app;
@@ -74,6 +77,10 @@ export class ElectronApp {
         this.listenEvents();
     }
 
+    getCommandIndex(tabId: string) {
+        return this.cmdEventsList_.findIndex(q => q.tabId === tabId);
+    }
+
     listenEvents() {
         electron.ipcMain.on(IPC_EVENTS.IsEventExist, async (event, args: EventExistPayload) => {
             // console.log("event", event, "args", args, "window", this.mainWindow_)
@@ -89,15 +96,10 @@ export class ElectronApp {
             const cmd = new CommandRunner(args.commandText);
             const tabId = args.tabId
             this.cmdEventsList_.push({
-                tabId: tabId
+                tabId: tabId,
+                process: cmd
             })
 
-            // cmd.onStdData(msg => {
-            //     this.mainWindow_.send(IPC_EVENTS.ExecuteCommand, {
-            //         tabId: tabId,
-            //         data: msg
-            //     })
-            // });
             cmd.event.on("data", msg => {
                 this.mainWindow_.send(IPC_EVENTS.ExecuteCommand, {
                     tabId: tabId,
@@ -110,21 +112,22 @@ export class ElectronApp {
                     error: msg
                 })
             });
-            // cmd.onStdError(msg => {
-            //     this.mainWindow_.send(IPC_EVENTS.ExecuteCommand, {
-            //         tabId: tabId,
-            //         error: msg
-            //     })
-            // })
+
             await cmd.run();
 
-            console.log("cmd finished")
             this.mainWindow_.send(IPC_EVENTS.ExecuteCommandFinished, {
                 tabId: args.tabId
             })
-            this.cmdEventsList_.pop();
+            this.cmdEventsList_.splice(this.getCommandIndex(tabId), 1);
+            console.log("cmd finished", this.cmdEventsList_.length)
+            // this.cmdEventsList_.pop();
             // console.log("event", event, "args", args, "window", this.mainWindow_)
 
+        })
+
+        electron.ipcMain.on(IPC_EVENTS.KillCommand, async (event, args) => {
+            console.log("recieved kill", args);
+            await this.cmdEventsList_.find(q => q.tabId === args.tabId).process.quit();
         })
 
     }

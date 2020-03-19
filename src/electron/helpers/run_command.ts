@@ -1,5 +1,6 @@
 import { exec, ChildProcess } from "child_process";
 import { EventEmitter } from "events";
+const fkill = require('fkill');
 export class CommandRunner {
     cmdString: string
     private childProcess_: ChildProcess
@@ -45,8 +46,10 @@ export class CommandRunner {
     //     // });
     // }
 
-    quit() {
-        this.childProcess_.kill("SIGINT");
+    async quit() {
+        console.log("killing child process", this.childProcess_.pid)
+        await fkill(this.childProcess_.pid);
+        // this.childProcess_.kill();
     }
 
 }
