@@ -1,9 +1,9 @@
-import { exec, ChildProcess } from "child_process";
+import { exec, ChildProcessWithoutNullStreams, spawn } from "child_process";
 import { EventEmitter } from "events";
 const fkill = require('fkill');
 export class CommandRunner {
     cmdString: string
-    private childProcess_: ChildProcess
+    private childProcess_: ChildProcessWithoutNullStreams
     private onResolve_;
     private onReject_;
 
@@ -16,7 +16,10 @@ export class CommandRunner {
         return new Promise((res, rej) => {
             this.onResolve_ = res;
             this.onReject_ = rej;
-            this.childProcess_ = exec(this.cmdString);
+            this.childProcess_ = spawn(this.cmdString, {
+                detached: true
+            });
+            //exec(this.cmdString);
             this.childProcess_.stdout.on('data', (data) => {
                 this.event.emit("data", data.toString())
             });
@@ -48,8 +51,9 @@ export class CommandRunner {
 
     async quit() {
         console.log("killing child process", this.childProcess_.pid)
-        await fkill(this.childProcess_.pid);
+        // await fkill(this.childProcess_.pid);
         // this.childProcess_.kill();
+        process.kill(-this.childProcess_.pid);
     }
 
 }
