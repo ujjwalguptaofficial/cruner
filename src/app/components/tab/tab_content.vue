@@ -3,19 +3,19 @@
     <div class="b-tab_content__line" v-for="line in lines" :key="line">
       <div>&gt;</div>
       <textarea
-        v-on:keyup.enter="onEnter"
-        :disabled="line<lines.length"
+        ref="textCmd"
+        v-on:keydown.enter.prevent="onEnter"
+        :disabled="line<lines"
         class="b-tab_content__text-area"
-        type="text"
-        v-model="value"
+        v-focus-on-create
       ></textarea>
     </div>
   </div>
 </template>
 <script lang="ts">
 import Vue from "vue";
-// import { ipcRenderer } from "electron";
-import { IPC_EVENTS, EventExistPayload } from "../../../commons";
+import { ipcRenderer } from "electron";
+import { IPC_EVENTS, EventExistPayload } from "../../../commons/index";
 export default Vue.extend({
   props: {
     id: String
@@ -28,19 +28,29 @@ export default Vue.extend({
   },
   methods: {
     onEnter() {
-      const commandText = this.value;
+      const commandText = this.$refs["textCmd"][this.lines - 1].value; //this.value;
       ++this.lines;
-    //   ipcRenderer.send(IPC_EVENTS.IsEventExist, {
-    //     tabId: this.id,
-    //     commandName: commandText.split(" ")[0]
-    //   } as EventExistPayload);
+      ipcRenderer.send(IPC_EVENTS.IsEventExist, {
+        tabId: this.id,
+        commandName: commandText.split(" ")[0]
+      } as EventExistPayload);
+      // ipcRenderer.send("sss", "as");
     },
     onEventExistResult(event, args) {
       console.log("args", args);
+      if (args.result === true) {
+      } else {
+        // this.lines++;
+        Vue.nextTick(() => {
+          this.$refs["textCmd"][this.lines - 1].value =
+            "invalid Command - command not found";
+          this.lines++;
+        });
+      }
     }
   },
   mounted() {
-    // ipcRenderer.on(IPC_EVENTS.IsEventExist, this.onEventExistResult);
+    ipcRenderer.on(IPC_EVENTS.IsEventExist, this.onEventExistResult);
   }
 });
 </script>
@@ -53,6 +63,8 @@ export default Vue.extend({
 .b-tab_content__line {
   display: flex;
   flex-direction: row;
+  // height: 25px;
+  margin-bottom: 5px;
 }
 .b-tab_content__text-area {
   margin-left: 5px;
@@ -61,9 +73,7 @@ export default Vue.extend({
   background: inherit;
   color: white;
   resize: none;
-}
-textarea#story {
-  // other stuff
+  overflow-y: hidden;
   -moz-appearance: none;
   outline: 0px none transparent;
 }

@@ -10,3 +10,12 @@ var vueApp = new Vue({
     // store: store,
     render: h => h(Terminal)
 });
+
+Vue.directive('focus-on-create', {
+    // Note: using Vue 1. In Vue 2, el would be a parameter
+    bind: function (el) {
+        Vue.nextTick(() => {
+            el.focus();
+        })
+    }
+})

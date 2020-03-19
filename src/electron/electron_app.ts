@@ -14,7 +14,7 @@ export class ElectronApp {
         // This method will be called when Electron has finished
         // initialization and is ready to create browser windows.
         // Some APIs can only be used after this event occurs.
-        this.app_.on('ready', this.createWindow_)
+        this.app_.on('ready', this.createWindow_.bind(this))
 
         // Quit when all windows are closed.
         this.app_.on('window-all-closed', () => {
@@ -33,12 +33,14 @@ export class ElectronApp {
             }
         })
 
-        this.listenEvents();
-
     }
 
     createWindow_() {
-        this.mainWindow_ = new electron.BrowserWindow();
+        this.mainWindow_ = new electron.BrowserWindow({
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
         this.mainWindow_.loadURL(url.format({
             pathname: path.join(__dirname, '../index.html'),
             protocol: 'file:'
@@ -55,10 +57,13 @@ export class ElectronApp {
             // when you should delete the corresponding element.
             this.mainWindow_ = null
         })
+
+        this.listenEvents();
     }
 
     listenEvents() {
         electron.ipcMain.on(IPC_EVENTS.IsEventExist, async (event, args: EventExistPayload) => {
+            // console.log("event", event, "args", args, "window", this.mainWindow_)
             this.mainWindow_.send(IPC_EVENTS.IsEventExist, {
                 commandName: args.commandName,
                 tabId: args.tabId,
