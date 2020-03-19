@@ -1,5 +1,5 @@
 <template>
-  <div class="b-tab__header">
+  <div @click="$emit('click')" class="b-tab__header">
     <slot name="title"></slot>
     <i class="fas fa-times b-tab__header__close-icon"></i>
   </div>
@@ -7,9 +7,9 @@
 <script lang="ts">
 import Vue from "vue";
 export default Vue.extend({
-  props: {
-    title: String
-  }
+  // props: {
+  //   id: String
+  // }
 });
 </script>
 <style lang="scss" scoped>

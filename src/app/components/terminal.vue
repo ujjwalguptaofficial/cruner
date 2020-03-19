@@ -1,14 +1,7 @@
 <template>
   <div class="b-terminal">
     <div class="b-terminal__tabs">
-      <!-- <Tab v-for="(item,index) in tabs" :key="index">
-        <template v-slot:title>{{item.title}}</template>
-        <template v-slot:default>
-          <p>A paragraph for the main content.</p>
-          <p>And another one.</p>
-        </template>
-      </Tab>-->
-      <Tab :tabs="tabs" @new-tab="addNewTab" />
+      <Tab :tabs="tabs" @new-tab="addNewTab" @header-clicked="handleHeaderClicked" />
     </div>
   </div>
 </template>
@@ -27,7 +20,16 @@ export default Vue.extend({
   },
   methods: {
     addNewTab() {
+      this.tabs.forEach(tab => {
+        tab.isActive = false;
+      });
       this.tabs.push({ id: getUniqId(), title: "New Tab", isActive: true });
+      // this.tabs.push({ id: getUniqId(), title: "New Tab", isActive: false });
+    },
+    handleHeaderClicked(id) {
+      this.tabs.forEach(tab => {
+        tab.isActive = tab.id === id;
+      });
     }
   },
   mounted() {
