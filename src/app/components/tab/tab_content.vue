@@ -1,11 +1,11 @@
 <template>
-  <div class="b-tab_content">
+  <div class="b-tab_content" @keyup.ctrl.67="onCtrlC">
     <div class="b-tab_content__line" v-for="line in lines" :key="line">
       <div v-if="shouldAddSymbol(line)">&gt;</div>
       <div
         ref="textCmd"
         v-on:keydown.enter.prevent="onEnter"
-        :contenteditable="line===lines"
+        :contenteditable="line===lines && isCommandFinished"
         class="b-tab_content__text-area"
         v-focus-on-create
       ></div>
@@ -29,15 +29,19 @@ export default Vue.extend({
     return {
       value: "",
       lines: 1,
-      linesWithoutSymbol: []
+      linesWithoutSymbol: [],
+      isCommandFinished: true
     };
   },
   methods: {
+    increaseLine() {
+      this.lines++;
+    },
     addMessage(msg: string) {
       Vue.nextTick(() => {
         this.linesWithoutSymbol.push(this.lines);
         this.$refs["textCmd"][this.lines - 1].innerText = msg;
-        this.lines++;
+        this.increaseLine();
       });
     },
     addError(msg: string) {
@@ -45,11 +49,18 @@ export default Vue.extend({
         this.linesWithoutSymbol.push(this.lines);
         this.$refs["textCmd"][this.lines - 1].innerText = msg;
         this.$refs["textCmd"][this.lines - 1].style.color = "#fd6666";
-        this.lines++;
+        this.increaseLine();
       });
     },
     shouldAddSymbol(val) {
       return this.linesWithoutSymbol.indexOf(val) < 0;
+    },
+    onCtrlC(e) {
+      if (this.isCommandFinished === true) {
+        console.log("copied");
+      } else {
+        e.preventDefault();
+      }
     },
     onEnter() {
       const commandText = this.$refs["textCmd"][
@@ -74,28 +85,31 @@ export default Vue.extend({
           tabId: args.tabId
         });
       } else {
-        // Vue.nextTick(() => {
-        //   this.linesWithoutSymbol.push(this.lines);
-        //   this.$refs["textCmd"][this.lines - 1].innerText =
-        //     "invalid Command - command not found";
-        //   this.lines++;
-        // });
         this.addMessage("invalid Command - command not found");
       }
     },
     executeCommandCallBack(event, result) {
       // this.linesWithoutSymbol.push(this.lines);
+      this.isCommandFinished = false;
       if (result.error) {
         this.addError(result.error);
       } else {
         this.addMessage(result.data);
       }
       // console.log(result);
+    },
+    executeCommandFinishedCallBack(event, result) {
+      this.isCommandFinished = true;
+      console.log(result);
     }
   },
   mounted() {
     ipcRenderer.on(IPC_EVENTS.IsEventExist, this.onEventExistResult);
     ipcRenderer.on(IPC_EVENTS.ExecuteCommand, this.executeCommandCallBack);
+    ipcRenderer.on(
+      IPC_EVENTS.ExecuteCommandFinished,
+      this.executeCommandFinishedCallBack
+    );
   }
 });
 </script>

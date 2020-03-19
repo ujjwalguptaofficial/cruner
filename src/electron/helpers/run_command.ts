@@ -15,5 +15,6 @@ export const runCommand = function (cmd: string, stdDataCallBack: (msg: string) 
         command.on('exit', function (code) {
             res(code);
         });
+        command.
     });
 }

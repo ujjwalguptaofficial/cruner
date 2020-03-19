@@ -85,7 +85,7 @@ export class ElectronApp {
         })
 
         electron.ipcMain.on(IPC_EVENTS.ExecuteCommand, async (event, args) => {
-            runCommand(args.commandText, (msg) => {
+            await runCommand(args.commandText, (msg) => {
                 this.mainWindow_.send(IPC_EVENTS.ExecuteCommand, {
                     tabId: args.tabId,
                     data: msg
@@ -96,6 +96,10 @@ export class ElectronApp {
                     error: msg
                 })
             });
+            console.log("cmd finished")
+            this.mainWindow_.send(IPC_EVENTS.ExecuteCommandFinished, {
+                tabId: args.tabId
+            })
             // console.log("event", event, "args", args, "window", this.mainWindow_)
 
         })
