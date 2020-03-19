@@ -15,6 +15,7 @@
 <script lang="ts">
 import Vue from "vue";
 import Tab from "./tab/index.vue";
+import { getUniqId } from "../helpers/get_uniq_id";
 export default Vue.extend({
   components: {
     Tab
@@ -26,11 +27,12 @@ export default Vue.extend({
   },
   methods: {
     addNewTab() {
-      this.tabs.push({ title: "New Tab", isActive: true });
+      this.tabs.push({ id: getUniqId(), title: "New Tab", isActive: true });
     }
   },
   mounted() {
     this.addNewTab();
+    console.log(this.tabs);
   }
 });
 </script>

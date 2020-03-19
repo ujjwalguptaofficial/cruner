@@ -9,14 +9,14 @@ const webpack = require('webpack');
 // const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 
 
-const isDev = process.env.NODE_ENV === 'development';
+const isProd = process.env.NODE_ENV === 'production';
 console.log("webpack build runing for environment", process.env.NODE_ENV);
-const outputFolder = isDev ? "build" : "dist";
+const outputFolder = isProd ? "build" : "dist";
 
 module.exports = [{
     entry: './src/electron/index.ts',
-    mode: isDev ? 'development' : 'production',
-    devtool: isDev ? 'source-map' : false,
+    mode: isProd ? 'production' : 'development',
+    devtool: isProd ? false : 'source-map',
     module: {
         rules: [{
             test: /\.ts$/,
@@ -27,14 +27,14 @@ module.exports = [{
         }]
     },
     resolve: {
-        extensions: ['.ts']
+        extensions: ['.ts', '.js']
     },
     output: {
         filename: 'scripts/app.js',
         path: path.resolve(__dirname, outputFolder)
     },
 
-    target: 'electron-renderer',
+    target: 'electron-main',
     node: {
         __dirname: false,
         __filename: false
@@ -42,8 +42,9 @@ module.exports = [{
 }
     , {
     entry: './src/app/index.ts',
-    devtool: isDev ? 'source-map' : false,
-    mode: isDev ? 'development' : 'production',
+    mode: isProd ? 'production' : 'development',
+    devtool: isProd ? false : 'source-map',
+    target: 'electron-renderer',
     module: {
         rules: [{
             test: /\.ts$/,
@@ -95,7 +96,7 @@ module.exports = [{
                 }
             ]
             // use: [
-            //     isDev ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
+            //     isProd ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
             //     { loader: 'css-loader' },
             // ]
         },
@@ -155,11 +156,11 @@ module.exports = [{
             // hash: true,
             template: './src/index.html',
             minify: {
-                collapseWhitespace: !isDev,
-                removeComments: !isDev,
-                removeRedundantAttributes: !isDev,
-                removeScriptTypeAttributes: !isDev,
-                removeStyleLinkTypeAttributes: !isDev
+                collapseWhitespace: !isProd,
+                removeComments: !isProd,
+                removeRedundantAttributes: !isProd,
+                removeScriptTypeAttributes: !isProd,
+                removeStyleLinkTypeAttributes: !isProd
             }
         }),
         new CopyPlugin([{

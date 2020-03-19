@@ -1,15 +1,16 @@
 <template>
   <div class="b-tab">
-    <!-- <div v-for=""> -->
-    <div class="b-tab__header-item">
-      <TabHeader v-for="(tab,index) in tabs" :key="index">
-        <template v-slot:title>{{tab.title}}</template>
-      </TabHeader>
-      <div @click="handleAddTabClick">
-        <i class="fas fa-plus b-tab__header-item__add-icon"></i>
+    <div v-for="tab in tabs" :key="tab.id">
+      <div class="b-tab__header-item">
+        <TabHeader>
+          <template v-slot:title>{{tab.title}}</template>
+        </TabHeader>
+        <div @click="handleAddTabClick">
+          <i class="fas fa-plus b-tab__header-item__add-icon"></i>
+        </div>
       </div>
+      <TabContent :id="tab.id" />
     </div>
-    <TabContent />
   </div>
 </template>
 <script lang="ts">

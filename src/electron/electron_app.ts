@@ -1,3 +1,5 @@
+import { IPC_EVENTS, EventExistResult, EventExistPayload } from "../commons";
+import { isCmdExist } from "./helpers";
 const electron = require('electron');
 const path = require('path')
 const url = require('url');
@@ -31,6 +33,8 @@ export class ElectronApp {
             }
         })
 
+        this.listenEvents();
+
     }
 
     createWindow_() {
@@ -51,5 +55,16 @@ export class ElectronApp {
             // when you should delete the corresponding element.
             this.mainWindow_ = null
         })
+    }
+
+    listenEvents() {
+        electron.ipcMain.on(IPC_EVENTS.IsEventExist, async (event, args: EventExistPayload) => {
+            this.mainWindow_.send(IPC_EVENTS.IsEventExist, {
+                commandName: args.commandName,
+                tabId: args.tabId,
+                result: await isCmdExist(args.commandName)
+            } as EventExistResult)
+        })
+
     }
 }
