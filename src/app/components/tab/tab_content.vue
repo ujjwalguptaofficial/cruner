@@ -2,13 +2,13 @@
   <div class="b-tab_content">
     <div class="b-tab_content__line" v-for="line in lines" :key="line">
       <div>&gt;</div>
-      <textarea
+      <div
         ref="textCmd"
         v-on:keydown.enter.prevent="onEnter"
-        :disabled="line<lines"
+        :contenteditable="line===lines"
         class="b-tab_content__text-area"
         v-focus-on-create
-      ></textarea>
+      ></div>
     </div>
   </div>
 </template>
@@ -28,7 +28,7 @@ export default Vue.extend({
   },
   methods: {
     onEnter() {
-      const commandText = this.$refs["textCmd"][this.lines - 1].value; //this.value;
+      const commandText = this.$refs["textCmd"][this.lines - 1].innerText; //this.value;
       ++this.lines;
       ipcRenderer.send(IPC_EVENTS.IsEventExist, {
         tabId: this.id,
@@ -42,7 +42,7 @@ export default Vue.extend({
       } else {
         // this.lines++;
         Vue.nextTick(() => {
-          this.$refs["textCmd"][this.lines - 1].value =
+          this.$refs["textCmd"][this.lines - 1].innerText =
             "invalid Command - command not found";
           this.lines++;
         });
@@ -67,23 +67,24 @@ export default Vue.extend({
   margin-bottom: 5px;
 }
 .b-tab_content__text-area {
-  margin-left: 5px;
+  padding: 0 5px;
+  // margin-left: 5px;
   width: 100%;
   border: none;
   background: inherit;
   color: white;
-  resize: none;
-  overflow-y: hidden;
+  // resize: none;
+  overflow: hidden;
   -moz-appearance: none;
   outline: 0px none transparent;
 }
 
-textarea:focus,
-input:focus {
-  outline: 0;
-}
+// textarea:focus,
+// input:focus {
+//   outline: 0;
+// }
 
-*:focus {
-  outline: 0;
-}
+// *:focus {
+//   outline: 0;
+// }
 </style>
