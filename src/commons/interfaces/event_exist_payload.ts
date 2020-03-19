@@ -1,4 +1,5 @@
 export interface EventExistPayload {
     tabId: string,
-    commandName: string
+    commandName: string,
+    commandText: string
 }

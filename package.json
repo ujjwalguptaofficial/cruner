@@ -48,6 +48,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.12.1",
     "command-exists": "^1.2.8",
+    "fortjs": "^1.13.0",
     "uuid": "^7.0.2",
     "vue": "^2.6.11"
   }

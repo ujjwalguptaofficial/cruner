@@ -1,5 +1,5 @@
 import { IPC_EVENTS, EventExistResult, EventExistPayload } from "../commons";
-import { isCmdExist } from "./helpers";
+import { isCmdExist, runCommand } from "./helpers";
 const electron = require('electron');
 const path = require('path')
 const url = require('url');
@@ -65,10 +65,27 @@ export class ElectronApp {
         electron.ipcMain.on(IPC_EVENTS.IsEventExist, async (event, args: EventExistPayload) => {
             // console.log("event", event, "args", args, "window", this.mainWindow_)
             this.mainWindow_.send(IPC_EVENTS.IsEventExist, {
+                commandText: args.commandText,
                 commandName: args.commandName,
                 tabId: args.tabId,
                 result: await isCmdExist(args.commandName)
             } as EventExistResult)
+        })
+
+        electron.ipcMain.on(IPC_EVENTS.ExecuteCommand, async (event, args) => {
+            runCommand(args.commandText, (msg) => {
+                this.mainWindow_.send(IPC_EVENTS.ExecuteCommand, {
+                    tabId: args.tabId,
+                    data: msg
+                })
+            }, (msg) => {
+                this.mainWindow_.send(IPC_EVENTS.ExecuteCommand, {
+                    tabId: args.tabId,
+                    error: msg
+                })
+            });
+            // console.log("event", event, "args", args, "window", this.mainWindow_)
+
         })
 
     }
