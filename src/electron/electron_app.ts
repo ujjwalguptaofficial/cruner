@@ -1,5 +1,5 @@
 import { IPC_EVENTS, EventExistResult, EventExistPayload } from "../commons";
-import { isCmdExist, runCommand } from "./helpers";
+import { isCmdExist, CommandRunner } from "./helpers";
 const electron = require('electron');
 const path = require('path')
 const url = require('url');
@@ -8,6 +8,7 @@ export class ElectronApp {
     private mainWindow_;
     private app_;
 
+    private cmdEventsList_ = [];
 
     init() {
         this.app_ = electron.app;
@@ -37,13 +38,13 @@ export class ElectronApp {
 
     async onReady() {
         this.createWindow_();
-        const homeDir = require('os').homedir();
-        // console.log("homeDir", homeDir)
-        await runCommand(`cd ${homeDir}`, (msg) => {
-            console.log(msg);
-        }, err => {
-            console.log(err);
-        })
+        // const homeDir = require('os').homedir();
+        // // console.log("homeDir", homeDir)
+        // await CommandRunner(`cd ${homeDir}`, (msg) => {
+        //     console.log(msg);
+        // }, err => {
+        //     console.log(err);
+        // })
         // console.log("homeDir", homeDir)
     }
 
@@ -85,21 +86,43 @@ export class ElectronApp {
         })
 
         electron.ipcMain.on(IPC_EVENTS.ExecuteCommand, async (event, args) => {
-            await runCommand(args.commandText, (msg) => {
+            const cmd = new CommandRunner(args.commandText);
+            const tabId = args.tabId
+            this.cmdEventsList_.push({
+                tabId: tabId
+            })
+
+            // cmd.onStdData(msg => {
+            //     this.mainWindow_.send(IPC_EVENTS.ExecuteCommand, {
+            //         tabId: tabId,
+            //         data: msg
+            //     })
+            // });
+            cmd.event.on("data", msg => {
                 this.mainWindow_.send(IPC_EVENTS.ExecuteCommand, {
-                    tabId: args.tabId,
+                    tabId: tabId,
                     data: msg
                 })
-            }, (msg) => {
+            });
+            cmd.event.on("error", msg => {
                 this.mainWindow_.send(IPC_EVENTS.ExecuteCommand, {
-                    tabId: args.tabId,
+                    tabId: tabId,
                     error: msg
                 })
             });
+            // cmd.onStdError(msg => {
+            //     this.mainWindow_.send(IPC_EVENTS.ExecuteCommand, {
+            //         tabId: tabId,
+            //         error: msg
+            //     })
+            // })
+            await cmd.run();
+
             console.log("cmd finished")
             this.mainWindow_.send(IPC_EVENTS.ExecuteCommandFinished, {
                 tabId: args.tabId
             })
+            this.cmdEventsList_.pop();
             // console.log("event", event, "args", args, "window", this.mainWindow_)
 
         })
