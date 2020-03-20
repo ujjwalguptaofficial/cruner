@@ -114,6 +114,14 @@ export default Vue.extend({
       IPC_EVENTS.ExecuteCommandFinished,
       this.executeCommandFinishedCallBack
     );
+  },
+  destroyed() {
+    ipcRenderer.off(IPC_EVENTS.IsEventExist, this.onEventExistResult);
+    ipcRenderer.off(IPC_EVENTS.ExecuteCommand, this.executeCommandCallBack);
+    ipcRenderer.off(
+      IPC_EVENTS.ExecuteCommandFinished,
+      this.executeCommandFinishedCallBack
+    );
   }
 });
 </script>
