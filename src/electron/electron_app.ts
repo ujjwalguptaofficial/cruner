@@ -3,6 +3,7 @@ import { isCmdExist, CommandRunner } from "./helpers";
 const electron = require('electron');
 const path = require('path')
 const url = require('url');
+const { createApp } = require("../server/bin/app")
 
 export class ElectronApp {
     private mainWindow_;
@@ -41,7 +42,9 @@ export class ElectronApp {
 
     async onReady() {
         this.createWindow_();
-        // const homeDir = require('os').homedir();
+        const homeDir = require('os').homedir();
+        // process.chdir('/tmp');
+        process.chdir(homeDir);
         // // console.log("homeDir", homeDir)
         // await CommandRunner(`cd ${homeDir}`, (msg) => {
         //     console.log(msg);
@@ -49,6 +52,8 @@ export class ElectronApp {
         //     console.log(err);
         // })
         // console.log("homeDir", homeDir)
+        console.log('createApp', createApp)
+        await createApp();
     }
 
     createWindow_() {
