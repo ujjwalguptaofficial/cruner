@@ -21,7 +21,9 @@ import {
   EventExistPayload,
   EventExistResult,
   IAskRequestPayload,
-  IAskResponsePayload
+  IAskResponsePayload,
+  ICmdResponsePayload,
+  COMMAND_TYPE
 } from "../../../commons/index";
 export default Vue.extend({
   props: {
@@ -78,10 +80,11 @@ export default Vue.extend({
       const valueFromTextArea = this.$refs["textCmd"][this.lines - 1].innerText;
       ++this.lines;
       if (this.askValue != null) {
-        ipcRenderer.send(IPC_EVENTS.AskFinished, {
+        ipcRenderer.send(IPC_EVENTS.CmdRequestFinished, {
           tabId: this.id,
-          answer: valueFromTextArea
-        } as IAskResponsePayload);
+          type: COMMAND_TYPE.Ask,
+          result: valueFromTextArea
+        } as ICmdResponsePayload);
       } else {
         const commandText = valueFromTextArea.trim(); //this.value;
         ipcRenderer.send(IPC_EVENTS.IsEventExist, {

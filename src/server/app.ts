@@ -1,7 +1,9 @@
 import { Fort, MustacheViewEngine } from 'fortjs';
 import { routes } from './routes';
-import { IEventCallBack } from './interfaces';
-import * as socketIo from "socket.io";
+import { IEventCallBack, ICmdResult } from './interfaces';
+// import * as socketIo from "socket.io";
+
+
 
 export class App extends Fort {
 
@@ -13,19 +15,33 @@ export class App extends Fort {
 
     static eventCallBack: IEventCallBack;
 
-    initSocketIo() {
-        const io = (socketIo as any)(this.httpServer);
-        io.on("connection", (socket) => {
-            console.log("user connected");
-            socket.on('disconnect', () => {
-                console.log('user disconnected');
-            });
+    static cmdResult: { [tabId: string]: ICmdResult } = {};
 
-            // socket.on('ask', (question) => {
-            //     console.log(`message is ${question}`);
-            // });
-        });
-    }
+    // static socketClients = {};
+
+    // static sendAskResponse(tabId: string, answer: string) {
+    //     const savedSocket = this.socketClients[tabId];
+    //     if (savedSocket != null) {
+    //         savedSocket.emit("ask_finished", answer);
+    //     }
+    // }
+
+    // initSocketIo() {
+    //     const io = (socketIo as any)(this.httpServer);
+    //     io.on("connection", (socket) => {
+    //         this.logger.debug("tabId", socket.handshake.query['tab_id'])
+    //         // App.socketClients[socket.handshake.query['tab_id']] = socket;
+
+    //         console.log("user connected");
+    //         socket.on('disconnect', () => {
+    //             console.log('user disconnected');
+    //         });
+
+    //         // socket.on('ask', (question) => {
+    //         //     console.log(`message is ${question}`);
+    //         // });
+    //     });
+    // }
 }
 
 

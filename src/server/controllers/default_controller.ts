@@ -10,4 +10,9 @@ export class DefaultController extends Controller {
         const result = await viewResult('default/index.html', data);
         return result;
     }
+
+    @Worker()
+    async chat() {
+        return viewResult('default/chat.html');
+    }
 }

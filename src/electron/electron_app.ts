@@ -1,9 +1,9 @@
-import { IPC_EVENTS, EventExistResult, EventExistPayload, IAskRequestPayload } from "../commons";
+import { IPC_EVENTS, EventExistResult, EventExistPayload, IAskRequestPayload, IAskResponsePayload, ICmdResponsePayload } from "../commons";
 import { isCmdExist, CommandRunner } from "./helpers";
 const electron = require('electron');
 const path = require('path')
 const url = require('url');
-const { createApp } = require("../server/bin/app")
+const { createApp, saveCommandResult } = require("../server/bin/app")
 
 export class ElectronApp {
     private mainWindow_;
@@ -52,7 +52,7 @@ export class ElectronApp {
         //     console.log(err);
         // })
         // console.log("homeDir", homeDir)
-        console.log('createApp', createApp)
+        // console.log('createApp', createApp)
         await createApp({
             ask: (payload: IAskRequestPayload) => {
                 console.log("msg", payload);
@@ -140,5 +140,9 @@ export class ElectronApp {
             await this.cmdEventsList_.find(q => q.tabId === args.tabId).process.quit();
         })
 
+        electron.ipcMain.on(IPC_EVENTS.CmdRequestFinished, async (event, args: ICmdResponsePayload) => {
+            console.log("args", args);
+            saveCommandResult(args)
+        })
     }
 }
