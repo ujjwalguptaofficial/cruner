@@ -4,6 +4,7 @@ export enum IPC_EVENTS {
     ExecuteCommandFinished = "execute_command_finished",
     KillCommand = "kill_command",
     Ask = "ask",
-    AskFinished = "ask_finished",
-    CmdRequestFinished="cmd_request_finished"
+    Print = "print",
+    // AskFinished = "ask_finished",
+    CmdRequestFinished = "cmd_request_finished"
 }

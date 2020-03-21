@@ -23,7 +23,8 @@ import {
   IAskRequestPayload,
   IAskResponsePayload,
   ICmdResponsePayload,
-  COMMAND_TYPE
+  COMMAND_TYPE,
+  IPrintRequestPayload
 } from "../../../commons/index";
 export default Vue.extend({
   props: {
@@ -137,6 +138,18 @@ export default Vue.extend({
     },
     isRequestBelongsToThisTab(tabId: string) {
       return this.id === tabId;
+    },
+    executePrint(e, payload: IPrintRequestPayload) {
+      console.log(
+        "payload",
+        payload,
+        this.isRequestBelongsToThisTab(payload.tabId)
+      );
+      // if (this.isRequestBelongsToThisTab(payload.tabId)) {
+      this.addMessage(payload.message);
+      // this.linesWithAskValue.push(this.lines);
+      // this.askValue = payload.message;
+      // }
     }
   },
   mounted() {
@@ -147,6 +160,7 @@ export default Vue.extend({
       this.executeCommandFinishedCallBack
     );
     ipcRenderer.on(IPC_EVENTS.Ask, this.executeAsk);
+    ipcRenderer.on(IPC_EVENTS.Print, this.executePrint);
   },
   destroyed() {
     ipcRenderer.off(IPC_EVENTS.IsEventExist, this.onEventExistResult);

@@ -28,6 +28,22 @@ export class CmdController extends Controller {
         } as IResult);
     }
 
+
+    @Worker([HTTP_METHOD.Post])
+    @Route("/print")
+    async print() {
+        const message = this.body.message;
+        const tabId = this.body.tabId;
+        // const id = getUniqId();
+        App.eventCallBack.print({
+            message: message,
+            tabId
+        });
+        return jsonResult({
+            success: true
+        } as IResult);
+    }
+
     // @Worker([HTTP_METHOD.Post])
     // @Route("/cmd_finished")
     // async cmdFinished() {
@@ -45,7 +61,7 @@ export class CmdController extends Controller {
             return jsonResult(result);
         }
         return jsonResult({
-            
+
         })
     }
 }
