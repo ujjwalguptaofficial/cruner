@@ -1,7 +1,8 @@
 <template>
   <div class="b-tab_content" @keyup.ctrl.67="onCtrlC">
     <div class="b-tab_content__line" v-for="line in lines" :key="line">
-      <div v-if="shouldAddSymbol(line)">&gt;</div>
+      <div class="b-tab_content__line__gt-symbol" v-if="shouldAddSymbol(line)">&gt;</div>
+      <div class="b-tab_content__line__ask" v-if="shouldAddAskValue(line)">{{askValue}}</div>
       <div
         ref="textCmd"
         v-on:keydown.enter.prevent="onEnter"
@@ -19,7 +20,8 @@ import {
   IPC_EVENTS,
   EventExistPayload,
   EventExistResult,
-  IAskRequestPayload
+  IAskRequestPayload,
+  IAskResponsePayload
 } from "../../../commons/index";
 export default Vue.extend({
   props: {
@@ -31,7 +33,9 @@ export default Vue.extend({
       value: "",
       lines: 1,
       linesWithoutSymbol: [],
-      isCommandFinished: true
+      isCommandFinished: true,
+      askValue: null,
+      linesWithAskValue: []
     };
   },
   methods: {
@@ -56,6 +60,9 @@ export default Vue.extend({
     shouldAddSymbol(val) {
       return this.linesWithoutSymbol.indexOf(val) < 0;
     },
+    shouldAddAskValue(val) {
+      return this.linesWithAskValue.indexOf(val) >= 0;
+    },
     onCtrlC(e) {
       // console.log("copied");
       if (this.isCommandFinished === false) {
@@ -68,15 +75,21 @@ export default Vue.extend({
       }
     },
     onEnter() {
-      const commandText = this.$refs["textCmd"][
-        this.lines - 1
-      ].innerText.trim(); //this.value;
+      const valueFromTextArea = this.$refs["textCmd"][this.lines - 1].innerText;
       ++this.lines;
-      ipcRenderer.send(IPC_EVENTS.IsEventExist, {
-        tabId: this.id,
-        commandText: commandText,
-        commandName: commandText.split(" ")[0]
-      } as EventExistPayload);
+      if (this.askValue != null) {
+        ipcRenderer.send(IPC_EVENTS.AskFinished, {
+          tabId: this.id,
+          answer: valueFromTextArea
+        } as IAskResponsePayload);
+      } else {
+        const commandText = valueFromTextArea.trim(); //this.value;
+        ipcRenderer.send(IPC_EVENTS.IsEventExist, {
+          tabId: this.id,
+          commandText: commandText,
+          commandName: commandText.split(" ")[0]
+        } as EventExistPayload);
+      }
       // ipcRenderer.send("sss", "as");
     },
     onEventExistResult(event, args: EventExistResult) {
@@ -113,6 +126,11 @@ export default Vue.extend({
         payload,
         this.isRequestBelongsToThisTab(payload.tabId)
       );
+      // if (this.isRequestBelongsToThisTab(payload.tabId)) {
+      // this.addMessage(payload.question);
+      this.linesWithAskValue.push(this.lines);
+      this.askValue = payload.question;
+      // }
     },
     isRequestBelongsToThisTab(tabId: string) {
       return this.id === tabId;
@@ -150,9 +168,10 @@ export default Vue.extend({
   margin-bottom: 5px;
 }
 .b-tab_content__text-area {
-  padding: 0 5px;
+  // padding: 0 5px;
+  padding-right: 5px;
   // margin-left: 5px;
-  width: 100%;
+  // width: 100%;
   border: none;
   background: inherit;
   color: white;
@@ -170,4 +189,11 @@ export default Vue.extend({
 // *:focus {
 //   outline: 0;
 // }
+
+.b-tab_content__line__gt-symbol {
+  padding-right: 5px;
+}
+.b-tab_content__line__ask {
+  padding-right: 5px;
+}
 </style>

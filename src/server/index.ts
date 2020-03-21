@@ -11,7 +11,7 @@ export const createApp = async (eventCallBack?: IEventCallBack) => {
             path: path.join(__dirname, "../static")
         }]
     });
-    // app.initSocketIo();
+    app.initSocketIo();
     process.env.APP_URL = "http://localhost:4000";
     return app;
 };
