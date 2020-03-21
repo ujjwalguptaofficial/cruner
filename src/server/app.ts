@@ -1,5 +1,6 @@
 import { Fort, MustacheViewEngine } from 'fortjs';
 import { routes } from './routes';
+import { IEventCallBack } from './interfaces';
 // import * as socketIo from "socket.io";
 
 export class App extends Fort {
@@ -9,6 +10,8 @@ export class App extends Fort {
         this.routes = routes;
         this.viewEngine = MustacheViewEngine;
     }
+
+    static eventCallBack: IEventCallBack;
 
     // initSocketIo() {
     //     const io = (socketIo as any)(this.httpServer);

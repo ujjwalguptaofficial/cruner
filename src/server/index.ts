@@ -1,7 +1,9 @@
 import { App } from "./app";
 import * as path from "path";
+import { IEventCallBack } from "./interfaces";
 
-export const createApp = async () => {
+export const createApp = async (eventCallBack?: IEventCallBack) => {
+    App.eventCallBack = eventCallBack;
     const app = new App();
     await app.create({
         folders: [{

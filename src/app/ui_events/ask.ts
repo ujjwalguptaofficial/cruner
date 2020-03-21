@@ -1,7 +1,8 @@
 import { vueApp } from "../app_bus";
-import { UiEventList } from "./ui_event_list";
-import { getUniqId } from "../helpers";
+// import { UiEventList } from "./ui_event_list";
+// import { getUniqId } from "../helpers";
 import { AskResult } from "./interfaces";
+import { IPC_EVENTS } from "src/commons";
 
 
 export const eventCollection: {
@@ -10,14 +11,14 @@ export const eventCollection: {
     id: string
 }[] = [];
 
-vueApp.$on(UiEventList.AskFinished, (result: AskResult) => {
+vueApp.$on(IPC_EVENTS.AskFinished, (result: AskResult) => {
     const index = eventCollection.findIndex(q => q.id === result.id);
     eventCollection[index].onResolve(result.answer);
 });
 
-export function ask(message: string, id) {
+export function ask(message: string, id: string) {
     return new Promise((res, rej) => {
-        vueApp.$emit(UiEventList.Ask, {
+        vueApp.$emit(IPC_EVENTS.Ask, {
             payload: {
                 message
             },

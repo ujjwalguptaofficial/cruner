@@ -53,7 +53,11 @@ export class ElectronApp {
         // })
         // console.log("homeDir", homeDir)
         console.log('createApp', createApp)
-        await createApp();
+        await createApp({
+            ask: (msg: string, id: string) => {
+                console.log("msg", msg);
+            }
+        });
     }
 
     createWindow_() {

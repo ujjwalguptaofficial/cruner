@@ -1,4 +1,4 @@
-export enum UiEventList {
-    Ask = "ask",
-    AskFinished = "ask_finished"
-}
+// export enum UiEventList {
+//     Ask = "ask",
+//     AskFinished = "ask_finished"
+// }
