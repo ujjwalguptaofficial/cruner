@@ -14,8 +14,12 @@ export class CmdController extends Controller {
     @Worker([HTTP_METHOD.Post])
     async ask() {
         const question = this.body.question;
+        const tabId = this.body.tabId;
         const id = getUniqId();
-        App.eventCallBack.ask(question, id);
+        App.eventCallBack.ask({
+            question: question,
+            tabId
+        });
         return jsonResult({
             success: true,
             data: {

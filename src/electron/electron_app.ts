@@ -1,4 +1,4 @@
-import { IPC_EVENTS, EventExistResult, EventExistPayload } from "../commons";
+import { IPC_EVENTS, EventExistResult, EventExistPayload, IAskRequestPayload } from "../commons";
 import { isCmdExist, CommandRunner } from "./helpers";
 const electron = require('electron');
 const path = require('path')
@@ -54,8 +54,9 @@ export class ElectronApp {
         // console.log("homeDir", homeDir)
         console.log('createApp', createApp)
         await createApp({
-            ask: (msg: string, id: string) => {
-                console.log("msg", msg);
+            ask: (payload: IAskRequestPayload) => {
+                console.log("msg", payload);
+                this.mainWindow_.send(IPC_EVENTS.Ask, payload)
             }
         });
     }

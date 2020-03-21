@@ -18,7 +18,8 @@ import { ipcRenderer } from "electron";
 import {
   IPC_EVENTS,
   EventExistPayload,
-  EventExistResult
+  EventExistResult,
+  IAskRequestPayload
 } from "../../../commons/index";
 export default Vue.extend({
   props: {
@@ -105,6 +106,16 @@ export default Vue.extend({
     executeCommandFinishedCallBack(event, result) {
       this.isCommandFinished = true;
       // console.log(result);
+    },
+    executeAsk(e, payload: IAskRequestPayload) {
+      console.log(
+        "payload",
+        payload,
+        this.isRequestBelongsToThisTab(payload.tabId)
+      );
+    },
+    isRequestBelongsToThisTab(tabId: string) {
+      return this.id === tabId;
     }
   },
   mounted() {
@@ -114,6 +125,7 @@ export default Vue.extend({
       IPC_EVENTS.ExecuteCommandFinished,
       this.executeCommandFinishedCallBack
     );
+    ipcRenderer.on(IPC_EVENTS.Ask, this.executeAsk);
   },
   destroyed() {
     ipcRenderer.off(IPC_EVENTS.IsEventExist, this.onEventExistResult);

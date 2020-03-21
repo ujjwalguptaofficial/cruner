@@ -1,3 +1,3 @@
 export interface IEventCallBack {
-    ask: (message: string, id: string) => void;
+    ask: (payload: { tabId: string; question: string; }) => void;
 }
