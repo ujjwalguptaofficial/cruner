@@ -1,7 +1,7 @@
 
 import { Controller, DefaultWorker, Worker, textResult, HTTP_METHOD, jsonResult, Route } from "fortjs";
 import { getUniqId } from "../helpers";
-import { IResult } from "../interfaces";
+import { IResult, ICmdResult } from "../interfaces";
 import { App } from "../app";
 
 export class CmdController extends Controller {
@@ -15,7 +15,7 @@ export class CmdController extends Controller {
     async ask() {
         const question = this.body.question;
         const tabId = this.body.tabId;
-        const id = getUniqId();
+        // const id = getUniqId();
         App.eventCallBack.ask({
             question: question,
             tabId
@@ -23,7 +23,7 @@ export class CmdController extends Controller {
         return jsonResult({
             success: true,
             data: {
-                id
+                tabId
             }
         } as IResult);
     }
@@ -44,5 +44,8 @@ export class CmdController extends Controller {
             delete App.cmdResult[id];
             return jsonResult(result);
         }
+        return jsonResult({
+            
+        })
     }
 }

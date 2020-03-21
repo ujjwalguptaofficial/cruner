@@ -61,24 +61,42 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
-        $(function () {
-            // var socket = io()
-            var socket = io.connect(location.origin, {
-                query: "tab_id=bar"
-            })
-            $('form').submit(function () {
-                var msg = $('#m').val();
-                // $('#messages').append('<li>' + msg + '</li>')
-                // socket.emit('chat message', msg);
-                $('#m').val('');
-                // return false;
-            });
-        });
+        // $(function () {
+        //     // var socket = io()
+        //     var socket = io.connect(location.origin, {
+        //         query: "tab_id=bar"
+        //     })
+        //     $('form').submit(function () {
+        //         var msg = $('#m').val();
+        //         // $('#messages').append('<li>' + msg + '</li>')
+        //         // socket.emit('chat message', msg);
+        //         $('#m').val('');
+        //         // return false;
+        //     });
+        // });
 
         $('#btnAsk').click(function () {
-            debugger;
             $('form').attr('action', '/cmd/ask');
             $('form').submit();
+        })
+
+        var timeOut = 100;
+
+        function checkForCmdResult() {
+            setTimeout(() => {
+                $.get(`/cmd/result?id=6c58277a-4644-4ccb-9eee-43484e726c6b`, function (data) {
+                    console.log(data);
+                    if (data.tabId) {
+
+                    } else {
+                        checkForCmdResult();
+                    }
+                })
+            }, timeOut);
+        }
+
+        $(document).ready(function () {
+            checkForCmdResult();
         })
     </script>
 </body>
