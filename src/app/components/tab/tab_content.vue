@@ -37,13 +37,16 @@ export default Vue.extend({
     ...mapState(["apps"])
   },
   filters: {},
+  created() {
+    this.askValue = null;
+  },
   data() {
     return {
       value: "",
       lines: 1,
       linesWithoutSymbol: [],
       isCommandFinished: true,
-      askValue: null,
+
       linesWithAskValue: []
     };
   },
