@@ -135,7 +135,7 @@ export class ElectronApp {
                     location: args.cmdAppLocation,
                     run: args.cliAppRunValue,
                     name: ""
-                });
+                }, tabId);
             }
 
             this.mainWindow_.send(IPC_EVENTS.ExecuteCommandFinished, {

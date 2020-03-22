@@ -38,18 +38,19 @@ export class CommandRunner {
         })
     }
 
-    runManual(info: IAppInfo) {
+    runManual(info: IAppInfo, tabId: string) {
         return new Promise((res, rej) => {
             this.onResolve_ = res;
             this.onReject_ = rej;
             console.log("cmd is ", info);
-            this.childProcess_ = spawn(`${info.run}`, {
+            this.childProcess_ = spawn(`${info.run}`, [`tab_id=${tabId}`], {
                 detached: true,
                 stdio: 'pipe',
                 shell: true,
-                cwd: info.location
+                cwd: info.location,
+
             });
-            //exec(this.cmdString);
+
             this.childProcess_.stdout.on('data', (data) => {
                 this.event.emit("data", data.toString())
             });
@@ -62,6 +63,14 @@ export class CommandRunner {
             this.childProcess_.on('exit', (code) => {
                 res(code);
             });
+
+            // this.childProcess_.emit("message", "hey");
+            // this.childProcess_.stdin.write("yo babe");
+            // this.childProcess_.stdin.end();
+
+            // this.childProcess_.send({
+            //     tabId: "defrgg"
+            // })
         })
     }
 
