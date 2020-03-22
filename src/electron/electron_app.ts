@@ -59,6 +59,10 @@ export class ElectronApp {
             },
             print: (payload: IPrintRequestPayload) => {
                 this.mainWindow_.send(IPC_EVENTS.Print, payload)
+            },
+            closeProcess: async (tabId: string) => {
+                this.sendCommandFinished(tabId);
+                await this.cmdEventsList_.find(q => q.tabId === tabId).process.quit();
             }
         });
     }
@@ -91,6 +95,12 @@ export class ElectronApp {
 
     getCommandIndex(tabId: string) {
         return this.cmdEventsList_.findIndex(q => q.tabId === tabId);
+    }
+
+    sendCommandFinished(tabId: string) {
+        this.mainWindow_.send(IPC_EVENTS.ExecuteCommandFinished, {
+            tabId: tabId
+        })
     }
 
     listenEvents() {
@@ -138,9 +148,10 @@ export class ElectronApp {
                 }, tabId);
             }
 
-            this.mainWindow_.send(IPC_EVENTS.ExecuteCommandFinished, {
-                tabId: args.tabId
-            })
+            // this.mainWindow_.send(IPC_EVENTS.ExecuteCommandFinished, {
+            //     tabId: args.tabId
+            // })
+            this.sendCommandFinished(args.tabId);
             this.cmdEventsList_.splice(this.getCommandIndex(tabId), 1);
             console.log("cmd finished", this.cmdEventsList_.length)
             // this.cmdEventsList_.pop();
@@ -149,13 +160,13 @@ export class ElectronApp {
         })
 
         electron.ipcMain.on(IPC_EVENTS.KillCommand, async (event, args) => {
-            console.log("recieved kill", args);
+            // console.log("recieved kill", args);
             await this.cmdEventsList_.find(q => q.tabId === args.tabId).process.quit();
         })
 
         electron.ipcMain.on(IPC_EVENTS.CmdRequestFinished, async (event, args: ICmdResponsePayload) => {
-            console.log("args", args);
-            saveCommandResult(args)
+            // console.log("args", args);
+            saveCommandResult(args);
         })
     }
 }

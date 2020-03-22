@@ -152,6 +152,8 @@ export default Vue.extend({
       // console.log(result);
     },
     executeCommandFinishedCallBack(event, result) {
+      this.askValue = null;
+      console.log("command finished", result);
       this.isCommandFinished = true;
       // console.log(result);
     },

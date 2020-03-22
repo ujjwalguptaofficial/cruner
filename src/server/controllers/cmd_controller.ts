@@ -58,6 +58,9 @@ export class CmdController extends Controller {
         const tabId = this.query.tabId || this.body.tabId;
         const result = App.cmdResult[tabId];
         if (result != null) {
+            setTimeout(() => {
+                App.eventCallBack.closeProcess(tabId);
+            }, 100);
             delete App.cmdResult[tabId];
             return jsonResult(result);
         }
