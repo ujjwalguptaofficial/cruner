@@ -97,6 +97,9 @@ export default Vue.extend({
         } as ICmdResponsePayload);
       } else {
         if (this.isCommandFinished === false) {
+          this.addMessage(
+            "A process is runing, first close it or wait it to be finished."
+          );
           return;
         }
         const commandText = valueFromTextArea.trim(); //this.value;
@@ -157,10 +160,14 @@ export default Vue.extend({
       }
       // console.log(result);
     },
-    executeCommandFinishedCallBack(event, result) {
-      this.askValue = null;
-      console.log("command finished", result);
-      this.isCommandFinished = true;
+    executeCommandFinishedCallBack(event, { tabId }) {
+      if (this.isRequestBelongsToThisTab(tabId)) {
+        this.askValue = null;
+        this.isCommandFinished = true;
+      }
+
+      console.log("command finished", tabId);
+
       // console.log(result);
     },
     executeAsk(e, payload: IAskRequestPayload) {

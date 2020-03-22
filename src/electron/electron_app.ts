@@ -61,7 +61,7 @@ export class ElectronApp {
                 this.mainWindow_.send(IPC_EVENTS.Print, payload)
             },
             closeProcess: async (tabId: string) => {
-                this.sendCommandFinished(tabId);
+                // this.sendCommandFinished(tabId);
                 await this.cmdEventsList_.find(q => q.tabId === tabId).process.quit();
             }
         });
