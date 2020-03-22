@@ -1,4 +1,4 @@
-import { IPC_EVENTS, EventExistResult, EventExistPayload, IAskRequestPayload, IAskResponsePayload, ICmdResponsePayload, IPrintRequestPayload } from "../commons";
+import { IPC_EVENTS, EventExistResult, EventExistPayload, IAskRequestPayload, IAskResponsePayload, ICmdResponsePayload, IPrintRequestPayload, IExecuteCommandPayload } from "../commons";
 import { isCmdExist, CommandRunner } from "./helpers";
 const electron = require('electron');
 const path = require('path')
@@ -100,11 +100,12 @@ export class ElectronApp {
                 commandText: args.commandText,
                 commandName: args.commandName,
                 tabId: args.tabId,
-                result: await isCmdExist(args.commandName)
+                result: await isCmdExist(args.commandName),
+                isSystemCmd: true
             } as EventExistResult)
         })
 
-        electron.ipcMain.on(IPC_EVENTS.ExecuteCommand, async (event, args) => {
+        electron.ipcMain.on(IPC_EVENTS.ExecuteCommand, async (event, args: IExecuteCommandPayload) => {
             const cmd = new CommandRunner(args.commandText);
             const tabId = args.tabId
             this.cmdEventsList_.push({
@@ -125,7 +126,17 @@ export class ElectronApp {
                 })
             });
 
-            await cmd.run();
+            if (args.isSystemCmd) {
+                await cmd.run();
+            }
+            else {
+                await cmd.runManual({
+                    command: "",
+                    location: args.cmdAppLocation,
+                    run: args.cliAppRunValue,
+                    name: ""
+                });
+            }
 
             this.mainWindow_.send(IPC_EVENTS.ExecuteCommandFinished, {
                 tabId: args.tabId

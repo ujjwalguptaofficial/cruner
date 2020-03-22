@@ -1,8 +1,10 @@
 import Vue from 'vue';
 import "@fortawesome/fontawesome-free/css/all.css";
 import "./styles/all.css";
-// import { store } from './store/store';
+// import Vuex from "vuex";
+
 import "./app_bus";
+
 
 Vue.directive('focus-on-create', {
     // Note: using Vue 1. In Vue 2, el would be a parameter

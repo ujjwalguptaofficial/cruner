@@ -24,11 +24,17 @@ import {
   IAskResponsePayload,
   ICmdResponsePayload,
   COMMAND_TYPE,
-  IPrintRequestPayload
+  IPrintRequestPayload,
+  IExecuteCommandPayload,
+  IAppInfo
 } from "../../../commons/index";
+import { mapState } from "vuex";
 export default Vue.extend({
   props: {
     id: String
+  },
+  computed: {
+    ...mapState(["apps"])
   },
   filters: {},
   data() {
@@ -88,24 +94,49 @@ export default Vue.extend({
         } as ICmdResponsePayload);
       } else {
         const commandText = valueFromTextArea.trim(); //this.value;
-        ipcRenderer.send(IPC_EVENTS.IsEventExist, {
-          tabId: this.id,
-          commandText: commandText,
-          commandName: commandText.split(" ")[0]
-        } as EventExistPayload);
+        const commandName = commandText.split(" ")[0];
+        const savedApp: IAppInfo = this.apps.find(
+          q => q.command === commandName
+        );
+        console.log("apps", this.apps);
+        if (savedApp != null) {
+          this.onCmdExistResult(
+            null,
+            {
+              tabId: this.id,
+              result: true,
+              isSystemCmd: false,
+              commandName: commandName,
+              commandText: commandText
+            } as EventExistResult,
+            savedApp
+          );
+        } else {
+          ipcRenderer.send(IPC_EVENTS.IsEventExist, {
+            tabId: this.id,
+            commandText: commandText,
+            commandName: commandName
+          } as EventExistPayload);
+        }
       }
-      // ipcRenderer.send("sss", "as");
     },
-    onEventExistResult(event, args: EventExistResult) {
+    onCmdExistResult(event, args: EventExistResult, appInfo: IAppInfo) {
       console.log("args", args);
       if (args.tabId !== this.id) {
         return;
       }
       if (args.result === true) {
-        ipcRenderer.send(IPC_EVENTS.ExecuteCommand, {
+        const payload = {
           commandText: args.commandText,
-          tabId: args.tabId
-        });
+          tabId: args.tabId,
+          isSystemCmd: args.isSystemCmd
+        } as IExecuteCommandPayload;
+
+        if (args.isSystemCmd === false) {
+          (payload.cmdAppLocation = appInfo.location),
+            (payload.cliAppRunValue = appInfo.run);
+        }
+        ipcRenderer.send(IPC_EVENTS.ExecuteCommand, payload);
       } else {
         this.addMessage("invalid Command - command not found");
       }
@@ -140,11 +171,6 @@ export default Vue.extend({
       return this.id === tabId;
     },
     executePrint(e, payload: IPrintRequestPayload) {
-      console.log(
-        "payload",
-        payload,
-        this.isRequestBelongsToThisTab(payload.tabId)
-      );
       // if (this.isRequestBelongsToThisTab(payload.tabId)) {
       this.addMessage(payload.message);
       // this.linesWithAskValue.push(this.lines);
@@ -153,7 +179,7 @@ export default Vue.extend({
     }
   },
   mounted() {
-    ipcRenderer.on(IPC_EVENTS.IsEventExist, this.onEventExistResult);
+    ipcRenderer.on(IPC_EVENTS.IsEventExist, this.onCmdExistResult);
     ipcRenderer.on(IPC_EVENTS.ExecuteCommand, this.executeCommandCallBack);
     ipcRenderer.on(
       IPC_EVENTS.ExecuteCommandFinished,
@@ -163,7 +189,7 @@ export default Vue.extend({
     ipcRenderer.on(IPC_EVENTS.Print, this.executePrint);
   },
   destroyed() {
-    ipcRenderer.off(IPC_EVENTS.IsEventExist, this.onEventExistResult);
+    ipcRenderer.off(IPC_EVENTS.IsEventExist, this.onCmdExistResult);
     ipcRenderer.off(IPC_EVENTS.ExecuteCommand, this.executeCommandCallBack);
     ipcRenderer.off(
       IPC_EVENTS.ExecuteCommandFinished,
