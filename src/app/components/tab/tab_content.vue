@@ -96,6 +96,9 @@ export default Vue.extend({
           result: valueFromTextArea
         } as ICmdResponsePayload);
       } else {
+        if (this.isCommandFinished === false) {
+          return;
+        }
         const commandText = valueFromTextArea.trim(); //this.value;
         const commandName = commandText.split(" ")[0];
         const savedApp: IAppInfo = this.apps.find(
