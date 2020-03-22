@@ -130,8 +130,7 @@ export default Vue.extend({
       }
     },
     onCmdExistResult(event, args: EventExistResult, appInfo: IAppInfo) {
-      console.log("args", args);
-      if (args.tabId !== this.id) {
+      if (this.isRequestBelongsToThisTab(args.tabId) === false) {
         return;
       }
       if (args.result === true) {
@@ -171,26 +170,18 @@ export default Vue.extend({
       // console.log(result);
     },
     executeAsk(e, payload: IAskRequestPayload) {
-      console.log(
-        "payload",
-        payload,
-        this.isRequestBelongsToThisTab(payload.tabId)
-      );
-      // if (this.isRequestBelongsToThisTab(payload.tabId)) {
-      // this.addMessage(payload.question);
-      this.linesWithAskValue.push(this.lines);
-      this.askValue = payload.question;
-      // }
+      if (this.isRequestBelongsToThisTab(payload.tabId)) {
+        this.linesWithAskValue.push(this.lines);
+        this.askValue = payload.question;
+      }
     },
     isRequestBelongsToThisTab(tabId: string) {
       return this.id === tabId;
     },
     executePrint(e, payload: IPrintRequestPayload) {
-      // if (this.isRequestBelongsToThisTab(payload.tabId)) {
-      this.addMessage(payload.message);
-      // this.linesWithAskValue.push(this.lines);
-      // this.askValue = payload.message;
-      // }
+      if (this.isRequestBelongsToThisTab(payload.tabId)) {
+        this.addMessage(payload.message);
+      }
     }
   },
   mounted() {
