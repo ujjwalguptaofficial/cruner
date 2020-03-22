@@ -43,7 +43,7 @@ export class CommandRunner {
             this.onResolve_ = res;
             this.onReject_ = rej;
             console.log("cmd is ", info);
-            this.childProcess_ = spawn(`${info.run}`, [`tab_id=${tabId}`], {
+            this.childProcess_ = spawn(`${info.run}`, [`tab_id=${tabId}`, `port=4000`], {
                 detached: true,
                 stdio: 'pipe',
                 shell: true,
@@ -63,14 +63,6 @@ export class CommandRunner {
             this.childProcess_.on('exit', (code) => {
                 res(code);
             });
-
-            // this.childProcess_.emit("message", "hey");
-            // this.childProcess_.stdin.write("yo babe");
-            // this.childProcess_.stdin.end();
-
-            // this.childProcess_.send({
-            //     tabId: "defrgg"
-            // })
         })
     }
 

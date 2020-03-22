@@ -19,7 +19,7 @@ export const createApp = async (eventCallBack?: IEventCallBack) => {
 };
 
 export function saveCommandResult(cmdResult: ICmdResult) {
-    console.log("result", cmdResult);
+    // console.log("result", cmdResult);
     App.cmdResult[cmdResult.tabId] = cmdResult;
 }
 // if (process.env.NODE_ENV !== "test") {

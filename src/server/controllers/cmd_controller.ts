@@ -12,6 +12,7 @@ export class CmdController extends Controller {
     }
 
     @Worker([HTTP_METHOD.Post])
+    @Route("/ask")
     async ask() {
         const question = this.body.question;
         const tabId = this.body.tabId;
@@ -54,10 +55,10 @@ export class CmdController extends Controller {
     @Worker()
     @Route("/result")
     async cmdResult() {
-        const id = this.query.id || this.body.id;
-        const result = App.cmdResult[id];
+        const tabId = this.query.tabId || this.body.tabId;
+        const result = App.cmdResult[tabId];
         if (result != null) {
-            delete App.cmdResult[id];
+            delete App.cmdResult[tabId];
             return jsonResult(result);
         }
         return jsonResult({
