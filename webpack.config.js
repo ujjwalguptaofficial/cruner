@@ -6,6 +6,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const TerserJSPlugin = require('terser-webpack-plugin');
 const webpack = require('webpack');
+const nodeExternals = require('webpack-node-externals');
 // const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 
 
@@ -24,8 +25,16 @@ module.exports = [{
             use: {
                 loader: 'ts-loader'
             }
-        }]
+        }
+            // , { test: /\.node$/, loader: 'file-loader?scripts/' }
+        ]
     },
+    externals: [
+        nodeExternals(),
+        // {
+        //     "node-pty": "pty"
+        // }
+    ],
     resolve: {
         extensions: ['.ts', '.js']
     },
@@ -38,7 +47,13 @@ module.exports = [{
     node: {
         __dirname: false,
         __filename: false
-    }
+    },
+    plugins: [
+        // new CopyPlugin([{
+        //     from: 'node_modules/node-pty-prebuilt/build/',
+        //     to: 'build'
+        // }]),
+    ]
 }
     , {
     entry: './src/app/index.ts',
@@ -46,98 +61,105 @@ module.exports = [{
     devtool: isProd ? false : 'source-map',
     target: 'electron-renderer',
     module: {
-        rules: [{
-            test: /\.ts$/,
-            exclude: /node_modules/,
-            use: {
-                loader: 'ts-loader',
-                options: {
-                    appendTsSuffixTo: [/\.vue$/],
+        rules: [
+            // {
+            //     test: /\.node$/,
+            //     use: {
+            //         loader: 'node-loader'
+            //     }
+            // },
+            {
+                test: /\.ts$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'ts-loader',
+                    options: {
+                        appendTsSuffixTo: [/\.vue$/],
+                    }
                 }
-            }
-        },
-        {
-            test: /\.(png|svg|jpg|gif)$/,
-            use: [{
-                loader: 'file-loader',
-                options: {
-                    outputPath: 'client/images',
-                },
-            }]
-        },
-        {
-            test: /\.vue$/,
-            loader: 'vue-loader'
-        },
+            },
+            {
+                test: /\.(png|svg|jpg|gif)$/,
+                use: [{
+                    loader: 'file-loader',
+                    options: {
+                        outputPath: 'client/images',
+                    },
+                }]
+            },
+            {
+                test: /\.vue$/,
+                loader: 'vue-loader'
+            },
 
-        {
-            test: /\.css$/,
-            oneOf: [
-                // this applies to <style module>
-                {
-                    resourceQuery: /module/,
-                    use: [
-                        'vue-style-loader',
-                        {
-                            loader: 'css-loader',
-                            options: {
-                                modules: true,
-                                localIdentName: '[local]_[hash:base64:8]'
+            {
+                test: /\.css$/,
+                oneOf: [
+                    // this applies to <style module>
+                    {
+                        resourceQuery: /module/,
+                        use: [
+                            'vue-style-loader',
+                            {
+                                loader: 'css-loader',
+                                options: {
+                                    modules: true,
+                                    localIdentName: '[local]_[hash:base64:8]'
+                                }
                             }
-                        }
-                    ]
-                },
-                // this applies to <style> or <style scoped>
-                {
-                    use: [
-                        'vue-style-loader',
-                        'css-loader'
-                    ]
-                }
-            ]
-            // use: [
-            //     isProd ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
-            //     { loader: 'css-loader' },
-            // ]
-        },
-        {
-            test: /\.styl$/,
-            use: [
-                {
-                    loader: "style-loader" // creates style nodes from JS strings
-                },
-                {
-                    loader: "css-loader" // translates CSS into CommonJS
-                },
-                {
-                    loader: "stylus-loader" // compiles Stylus to CSS
-                }
-            ]
-        },
-        {
-            test: /\.scss$/,
-            use: [
-                'vue-style-loader',
-                'css-loader',
-                {
-                    loader: 'sass-loader',
-                    // global data for all components
-                    // this can be read from a scss file
-                }
-            ]
-        },
-        {
-            test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,
-            use: 'file-loader?name=fonts/[name][hash].[ext]]&mimetype=application/octet-stream'
-        },
-        {
-            test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-            use: 'file-loader?name=fonts/[name][hash].[ext]&mimetype=application/octet-stream'
-        },
-        {
-            test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
-            use: 'file-loader'
-        }
+                        ]
+                    },
+                    // this applies to <style> or <style scoped>
+                    {
+                        use: [
+                            'vue-style-loader',
+                            'css-loader'
+                        ]
+                    }
+                ]
+                // use: [
+                //     isProd ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
+                //     { loader: 'css-loader' },
+                // ]
+            },
+            {
+                test: /\.styl$/,
+                use: [
+                    {
+                        loader: "style-loader" // creates style nodes from JS strings
+                    },
+                    {
+                        loader: "css-loader" // translates CSS into CommonJS
+                    },
+                    {
+                        loader: "stylus-loader" // compiles Stylus to CSS
+                    }
+                ]
+            },
+            {
+                test: /\.scss$/,
+                use: [
+                    'vue-style-loader',
+                    'css-loader',
+                    {
+                        loader: 'sass-loader',
+                        // global data for all components
+                        // this can be read from a scss file
+                    }
+                ]
+            },
+            {
+                test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,
+                use: 'file-loader?name=fonts/[name][hash].[ext]]&mimetype=application/octet-stream'
+            },
+            {
+                test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+                use: 'file-loader?name=fonts/[name][hash].[ext]&mimetype=application/octet-stream'
+            },
+            {
+                test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
+                use: 'file-loader'
+            }
         ]
     },
     output: {
