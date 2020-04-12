@@ -5,6 +5,10 @@ export default {
         name: "Demo",
         command: "demo",
         location: join(process.cwd(), "../commander-client-javascript"),
-        run: "node test/src/index.js"
-    } as IAppInfo]
+        main: "test/src/index.js",
+        target: "node",
+        // this.target + this.location + this.main
+        commandText: ""
+    } as any]
+    // IAppInfo
 }
