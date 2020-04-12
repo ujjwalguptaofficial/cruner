@@ -19,6 +19,8 @@
 import Vue from "vue";
 import TabHeader from "./tab_header.vue";
 import TabContent from "./tab_content.vue";
+import { ipcRenderer } from "electron";
+import { IPC_EVENTS } from "../../../commons/index";
 export default Vue.extend({
   components: {
     TabHeader,
@@ -34,7 +36,8 @@ export default Vue.extend({
     makeTabActive(id) {
       this.$emit("header-clicked", id);
     }
-  }
+  },
+ 
 });
 </script>
 <style lang="scss" scoped>

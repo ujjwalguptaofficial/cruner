@@ -1,5 +1,5 @@
 import { IPC_EVENTS, EventExistResult, EventExistPayload, IAskRequestPayload, IAskResponsePayload, ICmdResponsePayload, IPrintRequestPayload, IExecuteCommandPayload } from "../commons";
-import { isCmdExist, CommandRunner } from "./helpers";
+import { isCmdExist, CommandRunner, Terminal } from "./helpers";
 const electron = require('electron');
 const path = require('path')
 const url = require('url');
@@ -9,9 +9,9 @@ export class ElectronApp {
     private mainWindow_;
     private app_;
 
-    private cmdEventsList_: {
+    private tabs: {
         tabId: string,
-        process: CommandRunner
+        process: Terminal
     }[] = [];
 
     init() {
@@ -53,18 +53,18 @@ export class ElectronApp {
         // })
         // console.log("homeDir", homeDir)
         // console.log('createApp', createApp)
-        await createApp({
-            ask: (payload: IAskRequestPayload) => {
-                this.mainWindow_.send(IPC_EVENTS.Ask, payload)
-            },
-            print: (payload: IPrintRequestPayload) => {
-                this.mainWindow_.send(IPC_EVENTS.Print, payload)
-            },
-            closeProcess: async (tabId: string) => {
-                // this.sendCommandFinished(tabId);
-                await this.cmdEventsList_.find(q => q.tabId === tabId).process.quit();
-            }
-        });
+        // await createApp({
+        //     ask: (payload: IAskRequestPayload) => {
+        //         this.mainWindow_.send(IPC_EVENTS.Ask, payload)
+        //     },
+        //     print: (payload: IPrintRequestPayload) => {
+        //         this.mainWindow_.send(IPC_EVENTS.Print, payload)
+        //     },
+        //     closeProcess: async (tabId: string) => {
+        //         // this.sendCommandFinished(tabId);
+        //         await this.cmdEventsList_.find(q => q.tabId === tabId).process.quit();
+        //     }
+        // });
     }
 
     createWindow_() {
@@ -94,79 +94,52 @@ export class ElectronApp {
     }
 
     getCommandIndex(tabId: string) {
-        return this.cmdEventsList_.findIndex(q => q.tabId === tabId);
+        return this.tabs.findIndex(q => q.tabId === tabId);
     }
 
-    sendCommandFinished(tabId: string) {
-        this.mainWindow_.send(IPC_EVENTS.ExecuteCommandFinished, {
-            tabId: tabId
-        })
+    removeTab(tabId) {
+        const index = this.getCommandIndex(tabId);
+        if (index >= 0) {
+            this.tabs[index].process.quit();
+            this.tabs.splice(index, 1);
+        }
     }
+
+    // sendCommandFinished(tabId: string) {
+    //     this.mainWindow_.send(IPC_EVENTS.ExecuteCommandFinished, {
+    //         tabId: tabId
+    //     })
+    // }
 
     listenEvents() {
-        electron.ipcMain.on(IPC_EVENTS.IsEventExist, async (event, args: EventExistPayload) => {
-            // console.log("event", event, "args", args, "window", this.mainWindow_)
-            this.mainWindow_.send(IPC_EVENTS.IsEventExist, {
-                commandText: args.commandText,
-                commandName: args.commandName,
-                tabId: args.tabId,
-                result: await isCmdExist(args.commandName),
-                isSystemCmd: true
-            } as EventExistResult)
-        })
 
-        electron.ipcMain.on(IPC_EVENTS.ExecuteCommand, async (event, args: IExecuteCommandPayload) => {
-            const cmd = new CommandRunner(args.commandText);
-            const tabId = args.tabId
-            this.cmdEventsList_.push({
+        electron.ipcMain.on(IPC_EVENTS.NewTab, async (event, tabId) => {
+            console.log("tabid", tabId);
+            const cmd = new Terminal();
+            this.tabs.push({
                 tabId: tabId,
                 process: cmd
             })
 
             cmd.event.on("data", msg => {
-                this.mainWindow_.send(IPC_EVENTS.ExecuteCommand, {
+                this.mainWindow_.send(IPC_EVENTS.Data, {
                     tabId: tabId,
                     data: msg
                 })
             });
-            cmd.event.on("error", msg => {
-                this.mainWindow_.send(IPC_EVENTS.ExecuteCommand, {
-                    tabId: tabId,
-                    error: msg
-                })
+
+            cmd.event.on("exit", msg => {
+                this.removeTab(tabId)
             });
+        });
 
-            if (args.isSystemCmd) {
-                await cmd.run();
-            }
-            else {
-                await cmd.runManual({
-                    command: "",
-                    location: args.cmdAppLocation,
-                    run: args.cliAppRunValue,
-                    name: ""
-                }, tabId);
-            }
+        electron.ipcMain.on(IPC_EVENTS.Data, (event, args) => {
+            this.tabs[this.getCommandIndex(args.tabId)].process.pty.write(args.data);
+        });
 
-            // this.mainWindow_.send(IPC_EVENTS.ExecuteCommandFinished, {
-            //     tabId: args.tabId
-            // })
-            this.sendCommandFinished(args.tabId);
-            this.cmdEventsList_.splice(this.getCommandIndex(tabId), 1);
-            console.log("cmd finished", this.cmdEventsList_.length)
-            // this.cmdEventsList_.pop();
-            // console.log("event", event, "args", args, "window", this.mainWindow_)
-
+        electron.ipcMain.on(IPC_EVENTS.CloseTab, async (event, args) => {
+            this.removeTab(args.tabId);
         })
 
-        electron.ipcMain.on(IPC_EVENTS.KillCommand, async (event, args) => {
-            // console.log("recieved kill", args);
-            await this.cmdEventsList_.find(q => q.tabId === args.tabId).process.quit();
-        })
-
-        electron.ipcMain.on(IPC_EVENTS.CmdRequestFinished, async (event, args: ICmdResponsePayload) => {
-            // console.log("args", args);
-            saveCommandResult(args);
-        })
     }
 }
