@@ -19,6 +19,7 @@ import {
   IAppInfo
 } from "../../../commons/index";
 import { mapState } from "vuex";
+const path = require("path");
 export default Vue.extend({
   props: {
     id: String
@@ -53,11 +54,17 @@ export default Vue.extend({
           for (var i = 0, len = commandText.length; i < len; i++) {
             this.sendData("\b\u001b[K");
           }
+          this.sendData("\r");
+          this.sendData(
+            `${savedApp.target} ${path.join(savedApp.location, savedApp.main)}`
+          );
           setTimeout(() => {
             shouldWriteInUi = true;
             this.sendData("\r");
             // this.sendData(`cd ${savedApp.location} && ${savedApp.run}\r`);
-            this.sendData(`${savedApp.target} ${savedApp.location}/${savedApp.main}\r`);
+            // this.sendData(
+            //   `${savedApp.target} ${savedApp.location}/${savedApp.main}\r`
+            // );
           }, 100);
 
           // terminal.write("\b\u001b[K");
