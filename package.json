@@ -1,5 +1,5 @@
 {
-  "name": "commander",
+  "name": "cruner",
   "version": "1.0.0",
   "description": "",
   "main": "dist/scripts/app.js",
@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/ujjwalguptaofficial/commander#readme",
   "devDependencies": {
+    "@types/fs-extra": "^8.1.0",
     "copy-webpack-plugin": "^5.1.1",
     "css-loader": "^3.4.2",
     "electron": "^8.1.1",
@@ -52,8 +53,12 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.12.1",
     "command-exists": "^1.2.8",
+    "commander": "^5.0.0",
     "fkill": "^7.0.0",
     "fortjs": "^1.13.0",
+    "fs-extra": "^9.0.0",
+    "inquirer": "^7.1.0",
+    "jsstore": "^3.7.6",
     "node-pty": "^0.9.0",
     "socket.io": "^2.2.0",
     "socket.io-client": "^2.3.0",

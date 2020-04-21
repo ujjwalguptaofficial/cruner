@@ -22,7 +22,7 @@ export class Terminal {
             handleFlowControl: true
         });
         this.pty.onData(data => {
-            console.log("data", data.split(""), "len", data.length);
+            // console.log("data", data.split(""), "len", data.length);
             this.event.emit("data", data)
         })
         this.pty.onExit(e => {

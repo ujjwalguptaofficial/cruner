@@ -9,6 +9,8 @@
 import Vue from "vue";
 import Tab from "./tab/index.vue";
 import { getUniqId } from "../helpers/get_uniq_id";
+import { initJsStore, getAllApps } from "../storage";
+import { STORE_MUTATION } from "../enums";
 export default Vue.extend({
   components: {
     Tab
@@ -32,7 +34,14 @@ export default Vue.extend({
       });
     }
   },
-  mounted() {
+  async mounted() {
+    try {
+      await initJsStore();
+      this.$store.commit(STORE_MUTATION.SetApps, await getAllApps());
+    } catch (ex) {
+      console.error(ex);
+      alert("Unable to initialize app store");
+    }
     this.addNewTab();
     console.log(this.tabs);
   }

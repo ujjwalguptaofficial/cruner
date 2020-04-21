@@ -2,5 +2,7 @@ export interface IAppInfo {
     name: string;
     command: string;
     location: string;
-    run: string;
+    main: string;
+    commandToRun: string;
+    target: string;
 }

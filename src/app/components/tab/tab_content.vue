@@ -47,8 +47,11 @@ export default Vue.extend({
     terminal.onData(data => {
       console.log("data client", data);
       if (data === "\r") {
+        debugger;
         const commandName = commandText.split(" ")[0];
-        const savedApp = this.apps.find(q => q.command === commandName);
+        const savedApp: IAppInfo = this.apps.find(
+          q => q.command === commandName
+        );
         if (savedApp != null) {
           shouldWriteInUi = false;
           for (var i = 0, len = commandText.length; i < len; i++) {
@@ -56,7 +59,8 @@ export default Vue.extend({
           }
           this.sendData("\r");
           this.sendData(
-            `${savedApp.target} ${path.join(savedApp.location, savedApp.main)}`
+            // `${savedApp.target} ${path.join(savedApp.location, savedApp.main)}`
+            savedApp.commandToRun
           );
           setTimeout(() => {
             shouldWriteInUi = true;
