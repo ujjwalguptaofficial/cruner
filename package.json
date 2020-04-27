@@ -7,11 +7,14 @@
     "start": "webpack && electron .",
     "dev": "npm run start",
     "build": "webpack",
-    "rebuild": "electron-rebuild"
+    "build:prod": "webpack",
+    "rebuild": "electron-rebuild",
+    "pack": "electron-builder --dir",
+    "dist": "npm run build:prod && electron-builder"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ujjwalguptaofficial/commander.git"
+    "url": "git+https://github.com/ujjwalguptaofficial/cruner.git"
   },
   "keywords": [
     "command",
@@ -21,10 +24,13 @@
     "command",
     "store"
   ],
-  "author": "Ujjwal Gupta",
+  "author": {
+    "name": "Ujjwal Gupta",
+    "email": "ujjwalkumargupta44@gmail.com"
+  },
   "license": "APACHE 2.0",
   "bugs": {
-    "url": "https://github.com/ujjwalguptaofficial/commander/issues"
+    "url": "https://github.com/ujjwalguptaofficial/cruner/issues"
   },
   "homepage": "https://github.com/ujjwalguptaofficial/commander#readme",
   "devDependencies": {
@@ -32,6 +38,7 @@
     "copy-webpack-plugin": "^5.1.1",
     "css-loader": "^3.4.2",
     "electron": "^8.1.1",
+    "electron-builder": "^22.5.1",
     "electron-rebuild": "^1.10.1",
     "file-loader": "^6.0.0",
     "html-webpack-plugin": "^3.2.0",
@@ -60,6 +67,7 @@
     "inquirer": "^7.1.0",
     "jsstore": "^3.7.6",
     "node-pty": "^0.9.0",
+    "npm": "^6.14.4",
     "socket.io": "^2.2.0",
     "socket.io-client": "^2.3.0",
     "uuid": "^7.0.2",
@@ -69,5 +77,18 @@
     "vuex": "^3.1.3",
     "webpack-node-externals": "^1.7.2",
     "xterm": "^4.5.0"
+  },
+  "build": {
+    "appId": "ujjwal.crunner",
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    }
   }
 }

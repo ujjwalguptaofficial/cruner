@@ -84,7 +84,15 @@ export default Vue.extend({
 
           // terminal.write("\b\u001b[K");
           // this.sendData(`cd ${savedApp.location} && ${savedApp.run}\r`);
+          console.log(
+            "replace cmd",
+            `!!:gs/${savedApp.commandToRun}${cliArgs}/${this.commandText}/`
+          );
+          // this.sendData(
+          //   `!!:gs/${savedApp.commandToRun}${cliArgs}/${this.commandText}/`
+          // );
           this.commandText = "";
+
           return;
         }
         this.commandText = "";

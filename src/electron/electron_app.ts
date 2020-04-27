@@ -3,6 +3,7 @@ import { isCmdExist, CommandRunner, Terminal } from "./helpers";
 const electron = require('electron');
 const path = require('path')
 const url = require('url');
+const npm = require('npm');
 // const { createApp, saveCommandResult } = require("../server/bin/app")
 
 export class ElectronApp {
@@ -112,7 +113,8 @@ export class ElectronApp {
     // }
 
     listenEvents() {
-        console.log("dirname", __dirname)
+        // console.log("dirname", npm.globalDir)
+        console.log("dirname", process.env)
         electron.ipcMain.on(IPC_EVENTS.NewTab, async (event, tabId) => {
             console.log("tabid", tabId);
             const cmd = new Terminal();
