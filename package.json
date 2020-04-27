@@ -2,7 +2,7 @@
   "name": "cruner",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/scripts/app.js",
+  "main": "build/scripts/app.js",
   "scripts": {
     "start": "webpack && electron .",
     "dev": "npm run start",
@@ -59,6 +59,7 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.12.1",
+    "axios": "^0.19.2",
     "command-exists": "^1.2.8",
     "commander": "^5.0.0",
     "fkill": "^7.0.0",
@@ -80,8 +81,9 @@
   },
   "build": {
     "appId": "ujjwal.crunner",
+    "productName": "Cruner",
     "files": [
-      "dist/**/*",
+      "build/**/*",
       "package.json"
     ],
     "linux": {

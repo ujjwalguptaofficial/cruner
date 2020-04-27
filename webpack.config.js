@@ -12,7 +12,7 @@ const nodeExternals = require('webpack-node-externals');
 
 const isProd = process.env.NODE_ENV === 'production';
 console.log("webpack build runing for environment", process.env.NODE_ENV);
-const outputFolder = isProd ? "build" : "dist";
+const outputFolder = "build"; // isProd ? "build" : "dist";
 
 module.exports = [{
     entry: './src/electron/index.ts',

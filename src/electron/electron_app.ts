@@ -3,7 +3,8 @@ import { isCmdExist, CommandRunner, Terminal } from "./helpers";
 const electron = require('electron');
 const path = require('path')
 const url = require('url');
-const npm = require('npm');
+import { initCli } from "../cli/index";
+import { isArgsSupplied } from "../cli/helpers";
 // const { createApp, saveCommandResult } = require("../server/bin/app")
 
 export class ElectronApp {
@@ -44,32 +45,15 @@ export class ElectronApp {
     async onReady() {
         this.createWindow_();
         const homeDir = require('os').homedir();
-        // process.chdir('/tmp');
         process.chdir(homeDir);
-        // // console.log("homeDir", homeDir)
-        // await CommandRunner(`cd ${homeDir}`, (msg) => {
-        //     console.log(msg);
-        // }, err => {
-        //     console.log(err);
-        // })
-        // console.log("homeDir", homeDir)
-        // console.log('createApp', createApp)
-        // await createApp({
-        //     ask: (payload: IAskRequestPayload) => {
-        //         this.mainWindow_.send(IPC_EVENTS.Ask, payload)
-        //     },
-        //     print: (payload: IPrintRequestPayload) => {
-        //         this.mainWindow_.send(IPC_EVENTS.Print, payload)
-        //     },
-        //     closeProcess: async (tabId: string) => {
-        //         // this.sendCommandFinished(tabId);
-        //         await this.cmdEventsList_.find(q => q.tabId === tabId).process.quit();
-        //     }
-        // });
+        initCli();
     }
 
     createWindow_() {
+        const shouldShowWindow = !isArgsSupplied();
+        console.log("shouldShowWindow", shouldShowWindow);
         this.mainWindow_ = new electron.BrowserWindow({
+            show: shouldShowWindow,
             webPreferences: {
                 nodeIntegration: true
             }
@@ -114,7 +98,7 @@ export class ElectronApp {
 
     listenEvents() {
         // console.log("dirname", npm.globalDir)
-        console.log("dirname", process.env)
+        console.log("current dir", process.cwd())
         electron.ipcMain.on(IPC_EVENTS.NewTab, async (event, tabId) => {
             console.log("tabid", tabId);
             const cmd = new Terminal();
