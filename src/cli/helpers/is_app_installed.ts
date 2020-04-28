@@ -1,5 +1,6 @@
 import { pathExists } from "fs-extra";
 import { Config } from "../config";
-export async function isAppInstalled() {
-    return await pathExists(Config.installDir);
+import * as Path from "path";
+export async function isAppInstalled(appName: string) {
+    return await pathExists(Path.join(Config.installDir, appName));
 }

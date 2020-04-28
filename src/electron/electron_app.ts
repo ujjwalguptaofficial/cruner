@@ -5,6 +5,7 @@ const path = require('path')
 const url = require('url');
 import { initCli } from "../cli/index";
 import { isArgsSupplied } from "../cli/helpers";
+import { COMMAND_RESULT } from "../cli/enums";
 // const { createApp, saveCommandResult } = require("../server/bin/app")
 
 export class ElectronApp {
@@ -43,17 +44,37 @@ export class ElectronApp {
     }
 
     async onReady() {
-        this.createWindow_();
-        const homeDir = require('os').homedir();
-        process.chdir(homeDir);
-        initCli();
+        // const homeDir = require('os').homedir();
+        // process.chdir(homeDir);
+        console.log("initiating cli")
+        const cliResult = initCli();
+        console.log("cli result", cliResult);
+        switch (cliResult) {
+            case COMMAND_RESULT.Ok:
+                process.exit(); break;
+            case COMMAND_RESULT.InvalidCommand:
+                if (process.env.NODE_ENV !== "development") {
+                    process.exit(); break;
+                }
+            case COMMAND_RESULT.NoCommand:
+                this.createWindow_();
+                break;
+
+        }
+        // if (cliResult !== COMMAND_RESULT.InvalidCommand || ) {
+        //     this.createWindow_();
+        // }
+        // else {
+        //     process.exit();
+        // }
     }
 
     createWindow_() {
+        console.log("window create called")
         const shouldShowWindow = !isArgsSupplied();
         console.log("shouldShowWindow", shouldShowWindow);
         this.mainWindow_ = new electron.BrowserWindow({
-            show: shouldShowWindow,
+            // show: shouldShowWindow,
             webPreferences: {
                 nodeIntegration: true
             }

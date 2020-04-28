@@ -1,13 +1,18 @@
 import { ensureDir } from "fs-extra";
 import { join } from "path";
 import { Github } from "./github";
+import { isAppInstalled } from "./is_app_installed";
 
 export const addApp = async (url: string) => {
-    // const currentDirectory = process.cwd();
-    ensureDir(join(__dirname, "../apps"));
     if (url.includes("github")) {
         const repo = url.split("https://github.com/")[1];
-        Github.downloadRepo(repo);
+        const repoSplittedBySlash = repo.split("/");
+        const repoName = repoSplittedBySlash[repoSplittedBySlash.length - 1];
+        const path = await Github.downloadRepo(repo);
+        console.log("download path", path);
+        if (isAppInstalled(repoName)) {
+
+        }
     }
     else {
         console.log("Invalid repo")
