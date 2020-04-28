@@ -1,13 +1,13 @@
 import { addApp, isArgsSupplied } from "./helpers";
 import { COMMAND_RESULT } from "./enums/index";
-export const processCommand = function (commander) {
-    console.log(commander);
-    if (!isArgsSupplied()) {
-        return COMMAND_RESULT.NoCommand;
+import { Command } from "commander";
+export const processCommand = function (program) {
+    console.log(program);
+    if (program.add) {
+        addApp(program.add);
     }
-
-    if (commander.add) {
-        addApp(commander.add);
+    else if (program.start) {
+        
     }
     else {
         console.log('invalid command');

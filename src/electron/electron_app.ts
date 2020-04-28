@@ -1,4 +1,4 @@
-import { IPC_EVENTS, EventExistResult, EventExistPayload, IAskRequestPayload, IAskResponsePayload, ICmdResponsePayload, IPrintRequestPayload, IExecuteCommandPayload } from "../commons";
+import { IPC_EVENTS, EventExistResult, EventExistPayload, IAskRequestPayload, IAskResponsePayload, ICmdResponsePayload, IPrintRequestPayload, IExecuteCommandPayload, isDevelopment } from "../commons";
 import { isCmdExist, CommandRunner, Terminal } from "./helpers";
 const electron = require('electron');
 const path = require('path')
@@ -53,7 +53,7 @@ export class ElectronApp {
             case COMMAND_RESULT.Ok:
                 process.exit(); break;
             case COMMAND_RESULT.InvalidCommand:
-                if (process.env.NODE_ENV !== "development") {
+                if (!isDevelopment()) {
                     process.exit(); break;
                 }
             case COMMAND_RESULT.NoCommand:
@@ -85,8 +85,11 @@ export class ElectronApp {
 
         }))
 
-        // Open the DevTools.
-        this.mainWindow_.webContents.openDevTools()
+        if (isDevelopment()) {
+            // Open the DevTools.
+            this.mainWindow_.webContents.openDevTools()
+        }
+
 
         // Emitted when the window is closed.
         this.mainWindow_.on('closed', () => {
