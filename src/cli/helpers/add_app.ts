@@ -1,4 +1,4 @@
-import { createReadStream, exists, existsSync, mkdir, mkdirSync, createWriteStream } from "fs-extra";
+import { createReadStream, symlink, createWriteStream } from "fs-extra";
 import { join, resolve } from "path";
 import { Github } from "./github";
 import { isAppInstalled } from "./is_app_installed";
@@ -38,6 +38,8 @@ export const addApp = async (url: string) => {
                 await ensureDir(path);
             }
         }
+
+        await symlink(appinstallDir, join(Config.binDir, repoName), "file")
     }
     else {
         console.log("Invalid repo")
