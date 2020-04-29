@@ -1,6 +1,6 @@
 const path = require("path");
 export class Config {
-    static globalPrefix() {
+    static get globalPrefix() {
         let globalPrefix = "";
         if (process.env.PREFIX) {
             globalPrefix = process.env.PREFIX
@@ -24,5 +24,11 @@ export class Config {
             ? path.resolve(Config.globalPrefix, 'lib', 'cruner_apps')
             : path.resolve(Config.globalPrefix, 'cruner_apps')
         // return path.join(Config.globalPrefix, "cruner_apps");
+    }
+
+    static get binDir() {
+        return (process.platform !== 'win32')
+            ? path.resolve(Config.globalPrefix, 'bin')
+            : Config.globalPrefix
     }
 }

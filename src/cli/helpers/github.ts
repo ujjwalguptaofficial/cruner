@@ -21,19 +21,15 @@ export class Github {
             let response = await request.get(`https://api.github.com/repos/${repo}/releases/${tag}`);
             console.log("release", response.data);
             if (response.status === 200) {
-                const tarBallUrl = response.data["tarball_url"];
+                const tarBallUrl = response.data["zipball_url"];
                 const spinner = ora('Downloading app');
                 spinner.start();
                 const { data, headers } = await Axios.get(tarBallUrl, {
                     responseType: 'stream'
                 })
-                console.log("headers", headers);
                 const totalLength = headers['content-length'];
-                console.log("repo size", totalLength);
-
                 const fileDownloadPath = Path.resolve(tmpdir(), headers["content-disposition"].split(";")[1].split("=")[1]);
                 const writer = createWriteStream(fileDownloadPath);
-
                 data.pipe(writer);
                 return new Promise((resolve, reject) => {
                     writer.on('finish', () => {
