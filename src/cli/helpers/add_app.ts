@@ -22,42 +22,22 @@ export const addApp = async (url: string) => {
         await ensureDir(installDir);
         const appinstallDir = join(installDir, repoName)
         await ensureDir(appinstallDir);
-        // const extract = Extract({ path: appinstallDir })
-        return new Promise(async (res, rej) => {
-            const zip = createReadStream(path as string)
-                .pipe(
-                    Parse({ forceStream: true })
-                    // promise()
-                    // .then(() => { console.log('done'); res() }, rej)
-                );
-            for await (const entry of zip) {
-                const split = entry.path.split("/");
-                split.shift();
-                const path = join(appinstallDir, split.join("/"));
-                if (entry.type === "File") {
-                    entry.pipe(createWriteStream(path));
-                }
-                else {
-                    await ensureDir(path);
-                }
+
+        const zip = createReadStream(path as string)
+            .pipe(Parse({ forceStream: true }));
+
+        for await (const entry of zip) {
+            const split = entry.path.split("/");
+            split.shift();
+            const path = join(appinstallDir, split.join("/"));
+            if (entry.type === "File") {
+                entry.pipe(createWriteStream(path))
+                //.promise();
             }
-            res();
-            // .on("entry", function (entry) {
-            //         const split = entry.path.split("/");
-            //         split.shift();
-            //         const path = split.join("/");
-            //         console.log("enttry", path);
-            //         if (entry.type === "File") {
-
-            //         }
-            //         else {
-            //             await ensureDir(join(appinstallDir, path));
-            //         }
-            //     }).on("end", res);
-            // extract.promise().then(() => { console.log('done'); res() }, rej)
-            // });
-        })
-
+            else {
+                await ensureDir(path);
+            }
+        }
     }
     else {
         console.log("Invalid repo")
