@@ -15,6 +15,56 @@ console.log("webpack build runing for environment", process.env.NODE_ENV);
 const outputFolder = "build"; // isProd ? "build" : "dist";
 
 module.exports = [{
+    entry: [
+        path.resolve(__dirname, 'src/cli/index.ts')
+    ],
+    devtool: 'source-map',
+    target: "node",
+    mode: process.env.NODE_ENV || 'development',
+    optimization: {
+        // We no not want to minimize our code.
+        minimize: false,
+        // do not set NODE_ENV
+        nodeEnv: false
+    },
+    node: {
+        console: false,
+        global: false,
+        process: false,
+        Buffer: false,
+        __filename: false,
+        __dirname: false,
+    },
+    module: {
+        rules: [{
+            test: /\.ts$/,
+            exclude: /node_modules/,
+            use: {
+                loader: 'ts-loader'
+            }
+        }]
+    },
+    resolve: {
+        extensions: ['.ts']
+    },
+    output: {
+        filename: 'cli.js',
+        path: path.resolve(__dirname, outputFolder),
+        pathinfo: true,
+        library: 'Fort-Creator',
+        libraryTarget: "commonjs2"
+    },
+    plugins: [
+        // new webpack.BannerPlugin({
+        //     banner: banner,
+        // }),
+        // new webpack.BannerPlugin({
+        //     banner: "#!/usr/bin/env node",
+        //     raw: true
+        // }),
+    ],
+    externals: [nodeExternals()]
+}, {
     entry: './src/electron/index.ts',
     mode: isProd ? 'production' : 'development',
     devtool: isProd ? false : 'source-map',
@@ -39,7 +89,7 @@ module.exports = [{
         extensions: ['.ts', '.js']
     },
     output: {
-        filename: 'scripts/app.js',
+        filename: 'electron.js',
         path: path.resolve(__dirname, outputFolder)
     },
 

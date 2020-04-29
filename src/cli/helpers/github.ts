@@ -3,6 +3,8 @@ import { createWriteStream } from "fs-extra";
 const ProgressBar = require('progress');
 import { tmpdir } from "os";
 import * as Path from "path";
+const ora = require('ora');
+
 const request = Axios.create({
     validateStatus: function (status) {
         return true; // status >= 200 && status < 300; // default
@@ -17,29 +19,31 @@ export class Github {
         const repoInforesponse = await Github.getRepoInfo(repo);
         if (repoInforesponse.status === 200 || repoInforesponse.status === 201) {
             let response = await request.get(`https://api.github.com/repos/${repo}/releases/${tag}`);
+            console.log("release", response.data);
             if (response.status === 200) {
                 const tarBallUrl = response.data["tarball_url"];
-                console.log("downloading app");
+                const spinner = ora('Downloading app');
+                spinner.start();
                 const { data, headers } = await Axios.get(tarBallUrl, {
                     responseType: 'stream'
                 })
+                console.log("headers", headers);
                 const totalLength = headers['content-length'];
-                const progressBar = new ProgressBar('-> downloading [:bar] :percent :etas', {
-                    width: 40,
-                    complete: '=',
-                    incomplete: ' ',
-                    renderThrottle: 1,
-                    total: parseInt(totalLength)
-                });
+                console.log("repo size", totalLength);
+
                 const fileDownloadPath = Path.resolve(tmpdir(), headers["content-disposition"].split(";")[1].split("=")[1]);
                 const writer = createWriteStream(fileDownloadPath);
-                data.on('data', (chunk) => progressBar.tick(chunk.length))
+
                 data.pipe(writer);
                 return new Promise((resolve, reject) => {
                     writer.on('finish', () => {
+                        spinner.succeed();
                         resolve(fileDownloadPath);
                     })
-                    writer.on('error', reject)
+                    writer.on('error', () => {
+                        spinner.fail();
+                        reject();
+                    })
                 })
             }
         }

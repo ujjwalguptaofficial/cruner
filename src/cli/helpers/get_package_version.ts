@@ -2,7 +2,7 @@ import { readFileSync } from "fs-extra";
 import * as Path from "path";
 
 export const getPackageVersion = function () {
-    const pathOfPackage = Path.join(__dirname, "../../package.json");
+    const pathOfPackage = Path.join(__dirname, "../package.json");
     const contents = readFileSync(pathOfPackage, {
         encoding: "utf8"
     });

@@ -47,7 +47,7 @@ export class ElectronApp {
         // const homeDir = require('os').homedir();
         // process.chdir(homeDir);
         console.log("initiating cli")
-        const cliResult = initCli();
+        const cliResult = await initCli();
         console.log("cli result", cliResult);
         switch (cliResult) {
             case COMMAND_RESULT.Ok:
