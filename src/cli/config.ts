@@ -1,4 +1,6 @@
 const path = require("path");
+import { tmpdir } from "os";
+
 export class Config {
     static get globalPrefix() {
         let globalPrefix = "";
@@ -31,4 +33,6 @@ export class Config {
             ? path.resolve(Config.globalPrefix, 'bin')
             : Config.globalPrefix
     }
+
+    static tempDir = tmpdir();
 }

@@ -15,7 +15,7 @@ export class Github {
         // https://api.github.com/repos/ujjwalguptaofficial/fortjs
         return request.get(`https://api.github.com/repos/${repo}`);
     }
-    static async downloadRepo(repo: string, tag: string = "latest"): Promise<String> {
+    static async downloadRepo(repo: string, tag: string = "latest"): Promise<string> {
         const repoInforesponse = await Github.getRepoInfo(repo);
         if (repoInforesponse.status === 200 || repoInforesponse.status === 201) {
             let response = await request.get(`https://api.github.com/repos/${repo}/releases/${tag}`);
