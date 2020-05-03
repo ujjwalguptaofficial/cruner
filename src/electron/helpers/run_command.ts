@@ -29,7 +29,7 @@ export class CommandRunner {
                 name: 'xterm-color',
                 // cols: 0,
                 // rows: 0,
-                cwd: process.env.HOME,
+                // cwd: process.env.HOME,
                 env: process.env,
                 handleFlowControl: true
             });

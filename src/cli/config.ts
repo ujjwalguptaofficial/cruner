@@ -35,4 +35,6 @@ export class Config {
     }
 
     static tempDir = tmpdir();
+
+    static currentWorkingDirectory = process.cwd();
 }

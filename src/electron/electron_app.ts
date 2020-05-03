@@ -45,7 +45,7 @@ export class ElectronApp {
 
     async onReady() {
         // const homeDir = require('os').homedir();
-        // process.chdir(homeDir);
+        // process.chdir(process.cwd());
         console.log("initiating cli")
         const cliResult = await initCli();
         console.log("cli result", cliResult);
@@ -80,7 +80,7 @@ export class ElectronApp {
             }
         });
         this.mainWindow_.loadURL(url.format({
-            pathname: path.join(__dirname, '../index.html'),
+            pathname: path.join(__dirname, '../build/index.html'),
             protocol: 'file:'
 
         }))
