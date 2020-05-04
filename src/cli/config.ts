@@ -1,5 +1,5 @@
 const path = require("path");
-import { tmpdir } from "os";
+import { tmpdir, homedir } from "os";
 
 export class Config {
     static get globalPrefix() {
@@ -11,8 +11,8 @@ export class Config {
             globalPrefix = path.dirname(process.execPath)
         } else {
             // /usr/local/bin/node --> prefix=/usr/local
-            globalPrefix = path.dirname(path.dirname(process.execPath))
-
+            // globalPrefix = path.dirname(path.dirname(process.execPath))
+            globalPrefix = path.join("/.","usr");
             // destdir only is respected on Unix
             if (process.env.DESTDIR) {
                 globalPrefix = path.join(process.env.DESTDIR, globalPrefix)
@@ -37,4 +37,5 @@ export class Config {
     static tempDir = tmpdir();
 
     static currentWorkingDirectory = process.cwd();
+
 }

@@ -1,4 +1,4 @@
-import { createReadStream, remove, symlink, createWriteStream, pathExists, copy } from "fs-extra";
+import { createReadStream, remove, symlink, createWriteStream, pathExists, copy, unlink } from "fs-extra";
 import { join } from "path";
 import { Github } from "./github";
 import { isAppInstalled } from "./is_app_installed";
@@ -46,15 +46,18 @@ export const addApp = async (url: string) => {
         await symlink(appinstallDir, join(Config.binDir, appName), "file")
     }
     else {
-        const localPath = join(Config.currentWorkingDirectory, url);
-        console.log("localPath", localPath);
-        if (await pathExists(localPath)) {
+        const pathOfCrunerApp = join(Config.currentWorkingDirectory, url);
+        console.log("localPath", pathOfCrunerApp);
+        if (await pathExists(pathOfCrunerApp)) {
             console.log("pathexist");
-            const packageInfo = await getAppInfo(localPath);
+            const packageInfo = await getAppInfo(pathOfCrunerApp);
             console.log("packageInfo", packageInfo);
             const installDir = join(Config.installDir, packageInfo.name);
             console.log("installDir", installDir);
-            await copy(localPath, installDir);
+            if ((await pathExists(installDir)) === true) {
+                await remove(installDir);
+            }
+            await copy(pathOfCrunerApp, installDir);
             console.log("copied");
             await createSoftLink(packageInfo, installDir);
         }
@@ -67,13 +70,10 @@ export const addApp = async (url: string) => {
 async function createSoftLink(appInfo: IAppInfo, appinstallDir: string) {
     const source = join(appinstallDir, appInfo.main);
     console.log("source", source);
-
-    // if (await pathExists(source)) {
-    //     console.log("file found")
-    //     await remove(source);
-    // }
     const command = join(Config.binDir, appInfo.name);
     console.log("command", command);
-    await symlink(source, command, "junction")
+    if ((await pathExists(source)) === false) {
+        await symlink(source, command, "junction")
+    }
     await chmod(command, "755");
 }
