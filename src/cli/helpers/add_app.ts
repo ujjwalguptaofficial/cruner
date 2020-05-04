@@ -7,6 +7,7 @@ import { ensureDir } from "./ensure_dir";
 import { Parse } from "unzipper";
 import { IAppInfo } from "../interfaces";
 import { getAppInfo } from "./get_app_info";
+import { chmod } from "fs-extra";
 
 export const addApp = async (url: string) => {
 
@@ -71,5 +72,8 @@ async function createSoftLink(appInfo: IAppInfo, appinstallDir: string) {
     //     console.log("file found")
     //     await remove(source);
     // }
-    await symlink(source, join(Config.binDir, appInfo.name), "junction")
+    const command = join(Config.binDir, appInfo.name);
+    console.log("command", command);
+    await symlink(source, command, "junction")
+    await chmod(command, "755");
 }
