@@ -1,4 +1,4 @@
-import { IPC_EVENTS, EventExistResult, EventExistPayload, IAskRequestPayload, IAskResponsePayload, ICmdResponsePayload, IPrintRequestPayload, IExecuteCommandPayload, isDevelopment } from "../commons";
+import { IPC_EVENTS, EventExistResult, EventExistPayload, IAskRequestPayload, IAskResponsePayload, ICmdResponsePayload, IPrintRequestPayload, IExecuteCommandPayload, isDevelopment, Logger } from "../commons";
 import { isCmdExist, CommandRunner, Terminal } from "./helpers";
 import * as electron from 'electron';
 const path = require('path')
@@ -19,7 +19,7 @@ export class ElectronApp {
     }[] = [];
 
     init() {
-        console.log("electron init called");
+        Logger.debug("electron init called");
         this.app_ = electron.app;
         // This method will be called when Electron has finished
         // initialization and is ready to create browser windows.
@@ -50,13 +50,13 @@ export class ElectronApp {
         switch (cliResult) {
             case COMMAND_RESULT.Ok:
                 const command = `sudo cross-env IS_MANUAL=true node ${path.join(__dirname, '../build/cli.js')} ${process.argv.splice(2).join(" ")}`;
-                console.log("command", command);
+                Logger.debug("command", command);
                 try {
                     const cmd = new CommandRunner(command);
                     let exitCode = await cmd.runInSameShell();
-                    console.log("program exited with exitcode", exitCode)
+                    Logger.debug("program exited with exitcode", exitCode)
                     if (exitCode != 0) {
-                        console.log(`unable to execute command, some error occured`)
+                        Logger.log(`unable to execute command, some error occured`)
                     }
                     else {
                         process.exit(exitCode as any);
@@ -80,9 +80,8 @@ export class ElectronApp {
     }
 
     createWindow_() {
-        console.log("window create called")
         const shouldShowWindow = !isArgsSupplied();
-        console.log("shouldShowWindow", shouldShowWindow);
+        Logger.debug("shouldShowWindow", shouldShowWindow);
         this.mainWindow_ = new electron.BrowserWindow({
             // show: shouldShowWindow,
             webPreferences: {
@@ -132,10 +131,7 @@ export class ElectronApp {
     // }
 
     listenEvents() {
-        // console.log("dirname", npm.globalDir)
-        console.log("current dir", process.cwd())
         electron.ipcMain.on(IPC_EVENTS.NewTab, async (event, tabId) => {
-            console.log("tabid", tabId);
             const cmd = new Terminal();
             this.tabs.push({
                 tabId: tabId,
