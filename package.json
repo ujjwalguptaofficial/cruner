@@ -87,7 +87,7 @@
     "xterm": "^4.5.0"
   },
   "build": {
-    "appId": "ujjwal.crunner",
+    "appId": "ujjwal.gupta.cruner",
     "productName": "Cruner",
     "files": [
       "build/**/*",
@@ -96,6 +96,10 @@
     "linux": {
       "target": [
         "deb"
+      ],
+      "category": "Utilities",
+      "executableArgs": [
+        "--no-sandbox"
       ]
     }
   }

@@ -1,6 +1,6 @@
 import { IPC_EVENTS, EventExistResult, EventExistPayload, IAskRequestPayload, IAskResponsePayload, ICmdResponsePayload, IPrintRequestPayload, IExecuteCommandPayload, isDevelopment } from "../commons";
 import { isCmdExist, CommandRunner, Terminal } from "./helpers";
-const electron = require('electron');
+import * as electron from 'electron';
 const path = require('path')
 const url = require('url');
 import { initCli } from "../cli/index";
@@ -10,7 +10,7 @@ import { COMMAND_RESULT } from "../cli/enums";
 
 export class ElectronApp {
     private mainWindow_;
-    private app_;
+    private app_: electron.App;
 
     private tabs: {
         tabId: string,
@@ -18,6 +18,7 @@ export class ElectronApp {
     }[] = [];
 
     init() {
+        console.log("electron init called");
         this.app_ = electron.app;
         // This method will be called when Electron has finished
         // initialization and is ready to create browser windows.
@@ -76,8 +77,9 @@ export class ElectronApp {
         this.mainWindow_ = new electron.BrowserWindow({
             // show: shouldShowWindow,
             webPreferences: {
-                nodeIntegration: true
-            }
+                // nodeIntegration: true,
+                sandbox: false
+            },
         });
         this.mainWindow_.loadURL(url.format({
             pathname: path.join(__dirname, '../build/index.html'),
