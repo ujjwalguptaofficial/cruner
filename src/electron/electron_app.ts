@@ -46,40 +46,22 @@ export class ElectronApp {
     }
 
     async onReady() {
-        // const homeDir = require('os').homedir();
-        // process.chdir(process.cwd());
-        console.log("initiating cli")
         const cliResult = await initCli();
-        console.log("cli result", cliResult);
         switch (cliResult) {
             case COMMAND_RESULT.Ok:
                 const command = `sudo cross-env IS_MANUAL=true node ${path.join(__dirname, '../build/cli.js')} ${process.argv.splice(2).join(" ")}`;
                 console.log("command", command);
                 try {
                     const cmd = new CommandRunner(command);
-                    // cmd.event.on("data", msg => {
-                    //     console.log(msg);
-                    // });
-                    // cmd.event.on("error", msg => {
-                    //     console.error(msg);
-                    // });
-                    // cmd.run();
                     let exitCode = await cmd.runInSameShell();
                     console.log("program exited with exitcode", exitCode)
                     if (exitCode != 0) {
-                        console.log(`unable to clone, process exited with code ${exitCode.toString()}`)
+                        console.log(`unable to execute command, some error occured`)
                     }
                     else {
                         process.exit(exitCode as any);
                     }
-                    // sudo.exec(, {
-                    //     name: "Cruner"
-                    // },
-                    //     function (error, stdout, stderr) {
-                    //         if (error) throw error;
-                    //         console.log('stdout: ' + stdout);
-                    //     }
-                    // );
+
                 } catch (error) {
                     throw error;
                 }
@@ -95,12 +77,6 @@ export class ElectronApp {
                 break;
 
         }
-        // if (cliResult !== COMMAND_RESULT.InvalidCommand || ) {
-        //     this.createWindow_();
-        // }
-        // else {
-        //     process.exit();
-        // }
     }
 
     createWindow_() {

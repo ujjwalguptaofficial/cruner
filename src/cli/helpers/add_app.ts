@@ -8,6 +8,7 @@ import { Parse } from "unzipper";
 import { IAppInfo } from "../interfaces";
 import { getAppInfo } from "./get_app_info";
 import { chmod } from "fs-extra";
+import { Logger } from "../../commons";
 
 export const addApp = async (url: string) => {
 
@@ -15,14 +16,14 @@ export const addApp = async (url: string) => {
         const repo = url.split("https://github.com/")[1];
         const repoSplittedBySlash = repo.split("/");
         const path = await Github.downloadRepo(repo);
-        console.log("download path", path);
+        Logger.debug("download path", path);
         const appName = repoSplittedBySlash[repoSplittedBySlash.length - 1];
         // if (isAppInstalled(repoName)) {
 
 
         // }
         const installDir = Config.installDir;
-        console.log("Config.installDir", installDir, 'exec path', process.execPath);
+        Logger.debug("Config.installDir", installDir, 'exec path', process.execPath);
         await ensureDir(installDir);
         const appinstallDir = join(installDir, appName)
         await ensureDir(appinstallDir);
@@ -47,31 +48,33 @@ export const addApp = async (url: string) => {
     }
     else {
         const pathOfCrunerApp = join(Config.currentWorkingDirectory, url);
-        console.log("localPath", pathOfCrunerApp);
+        Logger.debug("localPath", pathOfCrunerApp);
         if (await pathExists(pathOfCrunerApp)) {
-            console.log("pathexist");
+            Logger.debug("local app path exist");
             const packageInfo = await getAppInfo(pathOfCrunerApp);
-            console.log("packageInfo", packageInfo);
+            Logger.debug("packageInfo", packageInfo);
             const installDir = join(Config.installDir, packageInfo.name);
-            console.log("installDir", installDir);
+            Logger.debug("installDir", installDir);
             if ((await pathExists(installDir)) === true) {
+                Logger.debug("local app exist, so removing")
                 await remove(installDir);
+                Logger.debug("Installed app removed")
             }
             await copy(pathOfCrunerApp, installDir);
-            console.log("copied");
+            Logger.debug("application copied");
             await createSoftLink(packageInfo, installDir);
         }
         else {
-            console.log("Invalid repo")
+            Logger.log("Invalid application - path not found")
         }
     }
 }
 
 async function createSoftLink(appInfo: IAppInfo, appinstallDir: string) {
     const source = join(appinstallDir, appInfo.main);
-    console.log("source", source);
+    Logger.debug("source", source);
     const command = join(Config.binDir, appInfo.name);
-    console.log("command", command);
+    Logger.debug("command", command);
     if ((await pathExists(source)) === false) {
         await symlink(source, command, "junction")
     }

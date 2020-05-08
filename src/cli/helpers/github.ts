@@ -3,6 +3,7 @@ import { createWriteStream } from "fs-extra";
 const ProgressBar = require('progress');
 import { tmpdir } from "os";
 import * as Path from "path";
+import { Logger } from "../../commons";
 const ora = require('ora');
 
 const request = Axios.create({
@@ -19,7 +20,7 @@ export class Github {
         const repoInforesponse = await Github.getRepoInfo(repo);
         if (repoInforesponse.status === 200 || repoInforesponse.status === 201) {
             let response = await request.get(`https://api.github.com/repos/${repo}/releases/${tag}`);
-            console.log("release", response.data);
+            Logger.debug("release", response.data);
             if (response.status === 200) {
                 const tarBallUrl = response.data["zipball_url"];
                 const spinner = ora('Downloading app');
@@ -44,7 +45,7 @@ export class Github {
             }
         }
         else {
-            console.log(`Invalid repo - repo ${repo} does not exist`);
+            Logger.log(`Invalid repo - repo ${repo} does not exist`);
         }
         return Promise.reject("Invalid repo");
     }
