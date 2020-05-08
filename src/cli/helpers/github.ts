@@ -4,7 +4,7 @@ const ProgressBar = require('progress');
 import { tmpdir } from "os";
 import * as Path from "path";
 import { Logger } from "../../commons";
-const ora = require('ora');
+import { Spinner } from "./spinner";
 
 const request = Axios.create({
     validateStatus: function (status) {
@@ -23,8 +23,7 @@ export class Github {
             Logger.debug("release", response.data);
             if (response.status === 200) {
                 const tarBallUrl = response.data["zipball_url"];
-                const spinner = ora('Downloading app');
-                spinner.start();
+                Spinner.start('Downloading app');
                 const { data, headers } = await Axios.get(tarBallUrl, {
                     responseType: 'stream'
                 })
@@ -34,11 +33,11 @@ export class Github {
                 data.pipe(writer);
                 return new Promise((resolve, reject) => {
                     writer.on('finish', () => {
-                        spinner.succeed();
+                        Spinner.succeed();
                         resolve(fileDownloadPath);
                     })
                     writer.on('error', () => {
-                        spinner.fail();
+                        Spinner.fail();
                         reject();
                     })
                 })

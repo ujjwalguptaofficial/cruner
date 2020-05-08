@@ -9,6 +9,7 @@ import { IAppInfo } from "../interfaces";
 import { getAppInfo } from "./get_app_info";
 import { chmod } from "fs-extra";
 import { Logger } from "../../commons";
+import { Spinner } from "./spinner";
 
 export const addApp = async (url: string) => {
 
@@ -17,6 +18,7 @@ export const addApp = async (url: string) => {
         const repoSplittedBySlash = repo.split("/");
         const path = await Github.downloadRepo(repo);
         Logger.debug("download path", path);
+        Spinner.start('Installing app');
         const appName = repoSplittedBySlash[repoSplittedBySlash.length - 1];
         // if (isAppInstalled(repoName)) {
 
@@ -45,8 +47,10 @@ export const addApp = async (url: string) => {
         }
 
         await symlink(appinstallDir, join(Config.binDir, appName), "file")
+        Spinner.succeed();
     }
     else {
+        Spinner.start('Installing app');
         const pathOfCrunerApp = join(Config.currentWorkingDirectory, url);
         Logger.debug("localPath", pathOfCrunerApp);
         if (await pathExists(pathOfCrunerApp)) {
@@ -63,9 +67,10 @@ export const addApp = async (url: string) => {
             await copy(pathOfCrunerApp, installDir);
             Logger.debug("application copied");
             await createSoftLink(packageInfo, installDir);
+            Spinner.succeed();
         }
         else {
-            Logger.log("Invalid application - path not found")
+            Spinner.fail("Invalid application - path not found")
         }
     }
 }
