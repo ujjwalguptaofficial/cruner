@@ -7,6 +7,7 @@ import { initCli } from "../cli/index";
 import { isArgsSupplied } from "../cli/helpers";
 import { COMMAND_RESULT } from "../cli/enums";
 // const { createApp, saveCommandResult } = require("../server/bin/app")
+var sudo = require('sudo-prompt');
 
 export class ElectronApp {
     private mainWindow_;
@@ -52,7 +53,39 @@ export class ElectronApp {
         console.log("cli result", cliResult);
         switch (cliResult) {
             case COMMAND_RESULT.Ok:
-                process.exit(); break;
+                const command = `sudo cross-env IS_MANUAL=true node ${path.join(__dirname, '../build/cli.js')} ${process.argv.splice(2).join(" ")}`;
+                console.log("command", command);
+                try {
+                    const cmd = new CommandRunner(command);
+                    // cmd.event.on("data", msg => {
+                    //     console.log(msg);
+                    // });
+                    // cmd.event.on("error", msg => {
+                    //     console.error(msg);
+                    // });
+                    // cmd.run();
+                    let exitCode = await cmd.runInSameShell();
+                    console.log("program exited with exitcode", exitCode)
+                    if (exitCode != 0) {
+                        console.log(`unable to clone, process exited with code ${exitCode.toString()}`)
+                    }
+                    else {
+                        process.exit(exitCode as any);
+                    }
+                    // sudo.exec(, {
+                    //     name: "Cruner"
+                    // },
+                    //     function (error, stdout, stderr) {
+                    //         if (error) throw error;
+                    //         console.log('stdout: ' + stdout);
+                    //     }
+                    // );
+                } catch (error) {
+                    throw error;
+                }
+
+                // process.exit();
+                break;
             case COMMAND_RESULT.InvalidCommand:
                 if (!isDevelopment()) {
                     process.exit(); break;
@@ -78,7 +111,7 @@ export class ElectronApp {
             // show: shouldShowWindow,
             webPreferences: {
                 // nodeIntegration: true,
-                sandbox: false
+                // sandbox: false
             },
         });
         this.mainWindow_.loadURL(url.format({

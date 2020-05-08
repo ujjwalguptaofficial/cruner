@@ -3,7 +3,7 @@ import { processCommand } from "./process_cmd";
 import { getPackageVersion, isArgsSupplied } from "./helpers";
 import { COMMAND_RESULT } from "./enums";
 
-export async function initCli() {
+export async function initCli(shouldExecute = false) {
     if (!isArgsSupplied()) {
         return COMMAND_RESULT.NoCommand;
     }
@@ -20,9 +20,10 @@ export async function initCli() {
         option('add [appUrl]', 'add app').
         parse(process.argv);
 
-    return await processCommand(commander);
+    return await processCommand(commander, shouldExecute);
 }
 
 if (process.env.IS_MANUAL == "true") {
-    initCli();
+    console.log("runing manually", process.argv);
+    initCli(true);
 }
