@@ -11,8 +11,8 @@ export class Spinner {
     //     oraInstance.succeed();
     // }
 
-    static succeed() {
-        oraInstance.succeed();
+    static succeed(message?: string) {
+        oraInstance.succeed(message);
     }
 
     static fail(message?: string) {

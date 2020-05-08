@@ -67,7 +67,7 @@ export const addApp = async (url: string) => {
             await copy(pathOfCrunerApp, installDir);
             Logger.debug("application copied");
             await createSoftLink(packageInfo, installDir);
-            Spinner.succeed();
+            Spinner.succeed("App installed successfully");
         }
         else {
             Spinner.fail("Invalid application - path not found")
