@@ -95,6 +95,7 @@ export class ElectronApp {
 
         }))
 
+        console.log("dev", process.env.NODE_ENV)
         if (isDevelopment()) {
             // Open the DevTools.
             this.mainWindow_.webContents.openDevTools()
@@ -123,12 +124,6 @@ export class ElectronApp {
             this.tabs.splice(index, 1);
         }
     }
-
-    // sendCommandFinished(tabId: string) {
-    //     this.mainWindow_.send(IPC_EVENTS.ExecuteCommandFinished, {
-    //         tabId: tabId
-    //     })
-    // }
 
     listenEvents() {
         electron.ipcMain.on(IPC_EVENTS.NewTab, async (event, tabId) => {
