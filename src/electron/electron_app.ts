@@ -1,13 +1,12 @@
-import { IPC_EVENTS, EventExistResult, EventExistPayload, IAskRequestPayload, IAskResponsePayload, ICmdResponsePayload, IPrintRequestPayload, IExecuteCommandPayload, isDevelopment, Logger } from "../commons";
-import { isCmdExist, CommandRunner, Terminal } from "./helpers";
+import { IPC_EVENTS, isDevelopment, Logger } from "../commons";
+import { CommandRunner, Terminal } from "./helpers";
 import * as electron from 'electron';
 const path = require('path')
 const url = require('url');
 import { initCli } from "../cli/index";
 import { isArgsSupplied } from "../cli/helpers";
 import { COMMAND_RESULT } from "../cli/enums";
-// const { createApp, saveCommandResult } = require("../server/bin/app")
-var sudo = require('sudo-prompt');
+
 
 export class ElectronApp {
     private mainWindow_;
