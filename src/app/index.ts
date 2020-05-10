@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import "@fortawesome/fontawesome-free/css/all.css";
 import "./styles/all.css";
-// import Vuex from "vuex";
 
 import "./app_bus";
 import "xterm/css/xterm.css";

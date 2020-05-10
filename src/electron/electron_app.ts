@@ -84,7 +84,7 @@ export class ElectronApp {
         this.mainWindow_ = new electron.BrowserWindow({
             // show: shouldShowWindow,
             webPreferences: {
-                // nodeIntegration: true,
+                nodeIntegration: true,
                 // sandbox: false
             },
         });
