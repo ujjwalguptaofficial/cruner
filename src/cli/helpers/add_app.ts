@@ -21,20 +21,27 @@ export const addApp = async (url: string) => {
             const repoSplittedBySlash = repo.split("/");
             const installDir = Config.installDir;
             const appName = repoSplittedBySlash[repoSplittedBySlash.length - 1];
-            const appinstallDir = join(installDir, appName)
+            const appinstallDir = join(installDir, appName);
+            const appBinDir = join(Config.binDir, appName);
             const path = await Github.downloadRepo(repo, async (info) => {
-                if (await isCommandExist(appName)) {
+                const isPathExist = await pathExists(appinstallDir);
+                if (isPathExist) {
                     Logger.debug("app exist");
                     const installedAppInfo = await getAppInfo(appinstallDir);
                     // if installing version is less than installed version
-                    if (semver.lt(info.tag_name, installedAppInfo.version)) {
-                        Logger.log("Skipping install - App is already installed & provided version is less than or equal to installed app version.")
+                    if (semver.lte(info.tag_name, installedAppInfo.version)) {
                         shouldInstall = false;
+                    }
+                    else {
+                        await unlink(appBinDir);
+                        await remove(installDir);
+                        Logger.debug("Installed app removed")
                     }
                 }
                 return shouldInstall;
             });
             if (!shouldInstall) {
+                process.exit();
                 return;
             }
             Logger.debug("download path", path);
@@ -61,8 +68,9 @@ export const addApp = async (url: string) => {
                 }
             }
 
-            await symlink(appinstallDir, join(Config.binDir, appName), "file")
+            await symlink(appinstallDir, appBinDir, "file")
             Spinner.succeed();
+            Logger.log("App Installed successfully");
         }
         catch (error) {
             Logger.debug("error", error);
@@ -91,7 +99,8 @@ export const addApp = async (url: string) => {
             await copy(pathOfCrunerApp, installDir);
             Logger.debug("application copied");
             await createSoftLink(packageInfo, installDir);
-            Spinner.succeed("App installed successfully");
+            Spinner.succeed();
+            Logger.log("App Installed successfully");
         }
         else {
             Spinner.fail("Invalid application - path not found")

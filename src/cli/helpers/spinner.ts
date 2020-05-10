@@ -7,9 +7,9 @@ export class Spinner {
         oraInstance.start();
     }
 
-    // stop() {
-    //     oraInstance.succeed();
-    // }
+    static stop() {
+        oraInstance.succeed();
+    }
 
     static succeed(message?: string) {
         oraInstance.succeed(message);

@@ -22,6 +22,7 @@ export class Github {
         try {
             Spinner.start("fetching app info from github");
             repoInforesponse = await Github.getRepoInfo(repo);
+            Spinner.succeed();
             Logger.debug("repoInfo", repoInforesponse.data);
         } catch (error) {
             throw `Unable to fetch github repo information for repo ${repo}`;
@@ -34,6 +35,8 @@ export class Github {
             if (response.status === 200) {
                 const shouldInstall = await onInfoFetched(response.data);
                 if (!shouldInstall) {
+                    Spinner.succeed();
+                    Logger.log("Skipping install - App is already installed & provided version is less than or equal to installed app version.")
                     return;
                 }
                 const tarBallUrl = response.data["zipball_url"];

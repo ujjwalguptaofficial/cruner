@@ -3,6 +3,7 @@ import { processCommand } from "./process_cmd";
 import { getPackageVersion, isArgsSupplied } from "./helpers";
 import { COMMAND_RESULT } from "./enums";
 import { Logger } from "../commons";
+import { Spinner } from "./helpers/spinner";
 
 export async function initCli(shouldExecute = false) {
 
@@ -30,3 +31,7 @@ if (process.env.IS_MANUAL == "true") {
     Logger.debug("runing manually", process.argv);
     initCli(true);
 }
+
+// process.on("exit", function () {
+//     Spinner.stop();
+// });
