@@ -37,6 +37,7 @@
   "devDependencies": {
     "@types/fs-extra": "^8.1.0",
     "@types/node": "^13.13.4",
+    "@types/semver": "^7.1.0",
     "@types/unzipper": "^0.10.3",
     "copy-webpack-plugin": "^5.1.1",
     "css-loader": "^3.4.2",
@@ -72,6 +73,7 @@
     "node-pty": "^0.9.0",
     "ora": "^4.0.4",
     "progress": "^2.0.3",
+    "semver": "^7.3.2",
     "unzipper": "^0.10.11",
     "uuid": "^7.0.2",
     "vue": "^2.6.11",

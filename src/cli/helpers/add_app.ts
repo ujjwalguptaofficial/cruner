@@ -1,7 +1,7 @@
 import { createReadStream, remove, symlink, createWriteStream, pathExists, copy, unlink } from "fs-extra";
 import { join } from "path";
 import { Github } from "./github";
-import { isAppInstalled } from "./is_app_installed";
+import { isCommandExist } from "./is_app_installed";
 import { Config } from "../config";
 import { ensureDir } from "./ensure_dir";
 import { Parse } from "unzipper";
@@ -10,24 +10,39 @@ import { getAppInfo } from "./get_app_info";
 import { chmod } from "fs-extra";
 import { Logger } from "../../commons";
 import { Spinner } from "./spinner";
+import * as semver from "semver";
 
 export const addApp = async (url: string) => {
 
     if (url.includes("github")) {
         try {
+            let shouldInstall = true;
             const repo = url.split("https://github.com/")[1];
             const repoSplittedBySlash = repo.split("/");
-            const path = await Github.downloadRepo(repo);
+            const installDir = Config.installDir;
+            const appName = repoSplittedBySlash[repoSplittedBySlash.length - 1];
+            const appinstallDir = join(installDir, appName)
+            const path = await Github.downloadRepo(repo, async (info) => {
+                if (await isCommandExist(appName)) {
+                    Logger.debug("app exist");
+                    const installedAppInfo = await getAppInfo(appinstallDir);
+                    // if installing version is less than installed version
+                    if (semver.lt(info.tag_name, installedAppInfo.version)) {
+                        Logger.log("Skipping install - App is already installed & provided version is less than or equal to installed app version.")
+                        shouldInstall = false;
+                    }
+                }
+                return shouldInstall;
+            });
+            if (!shouldInstall) {
+                return;
+            }
             Logger.debug("download path", path);
             Spinner.start('Installing app');
-            const appName = repoSplittedBySlash[repoSplittedBySlash.length - 1];
-            if (await isAppInstalled(appName)) {
-                console.log("app exist");
-            }
-            const installDir = Config.installDir;
+
             Logger.debug("Config.installDir", installDir, 'exec path', process.execPath);
             await ensureDir(installDir);
-            const appinstallDir = join(installDir, appName)
+
             await ensureDir(appinstallDir);
 
             const zip = createReadStream(path as string)

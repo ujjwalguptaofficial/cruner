@@ -5,6 +5,7 @@ import { tmpdir } from "os";
 import * as Path from "path";
 import { Logger } from "../../commons";
 import { Spinner } from "./spinner";
+import { IGitHubRepoReleaseInfo } from "../interfaces";
 
 const request = Axios.create({
     validateStatus: function (status) {
@@ -16,7 +17,7 @@ export class Github {
         // https://api.github.com/repos/ujjwalguptaofficial/fortjs
         return await request.get(`https://api.github.com/repos/${repo}`);
     }
-    static async downloadRepo(repo: string, tag: string = "latest"): Promise<string> {
+    static async downloadRepo(repo: string, onInfoFetched: (info: IGitHubRepoReleaseInfo) => Promise<boolean>, tag: string = "latest"): Promise<string> {
         let repoInforesponse;
         try {
             Spinner.start("fetching app info from github");
@@ -31,6 +32,10 @@ export class Github {
             let response = await request.get(releaseUrl);
             Logger.debug("release", response.data);
             if (response.status === 200) {
+                const shouldInstall = await onInfoFetched(response.data);
+                if (!shouldInstall) {
+                    return;
+                }
                 const tarBallUrl = response.data["zipball_url"];
                 Spinner.start('Downloading app');
                 const { data, headers } = await Axios.get(tarBallUrl, {
