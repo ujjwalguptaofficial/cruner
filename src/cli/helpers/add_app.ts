@@ -14,40 +14,49 @@ import { Spinner } from "./spinner";
 export const addApp = async (url: string) => {
 
     if (url.includes("github")) {
-        const repo = url.split("https://github.com/")[1];
-        const repoSplittedBySlash = repo.split("/");
-        const path = await Github.downloadRepo(repo);
-        Logger.debug("download path", path);
-        Spinner.start('Installing app');
-        const appName = repoSplittedBySlash[repoSplittedBySlash.length - 1];
-        // if (isAppInstalled(repoName)) {
-
-
-        // }
-        const installDir = Config.installDir;
-        Logger.debug("Config.installDir", installDir, 'exec path', process.execPath);
-        await ensureDir(installDir);
-        const appinstallDir = join(installDir, appName)
-        await ensureDir(appinstallDir);
-
-        const zip = createReadStream(path as string)
-            .pipe(Parse({ forceStream: true }));
-
-        for await (const entry of zip) {
-            const split = entry.path.split("/");
-            split.shift();
-            const path = join(appinstallDir, split.join("/"));
-            if (entry.type === "File") {
-                entry.pipe(createWriteStream(path))
-                //.promise();
+        try {
+            const repo = url.split("https://github.com/")[1];
+            const repoSplittedBySlash = repo.split("/");
+            const path = await Github.downloadRepo(repo);
+            Logger.debug("download path", path);
+            Spinner.start('Installing app');
+            const appName = repoSplittedBySlash[repoSplittedBySlash.length - 1];
+            if (await isAppInstalled(appName)) {
+                console.log("app exist");
             }
-            else {
-                await ensureDir(path);
+            const installDir = Config.installDir;
+            Logger.debug("Config.installDir", installDir, 'exec path', process.execPath);
+            await ensureDir(installDir);
+            const appinstallDir = join(installDir, appName)
+            await ensureDir(appinstallDir);
+
+            const zip = createReadStream(path as string)
+                .pipe(Parse({ forceStream: true }));
+
+            for await (const entry of zip) {
+                const split = entry.path.split("/");
+                split.shift();
+                const path = join(appinstallDir, split.join("/"));
+                if (entry.type === "File") {
+                    entry.pipe(createWriteStream(path))
+                    //.promise();
+                }
+                else {
+                    await ensureDir(path);
+                }
             }
+
+            await symlink(appinstallDir, join(Config.binDir, appName), "file")
+            Spinner.succeed();
         }
-
-        await symlink(appinstallDir, join(Config.binDir, appName), "file")
-        Spinner.succeed();
+        catch (error) {
+            Logger.debug("error", error);
+            Spinner.fail(error.message || "error occured while installing app form github");
+            // allow to process other task if any like logging etc
+            setTimeout(() => {
+                process.exit(1);
+            }, 1000);
+        }
     }
     else {
         Spinner.start('Installing app');

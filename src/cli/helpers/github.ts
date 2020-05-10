@@ -14,12 +14,21 @@ const request = Axios.create({
 export class Github {
     static async getRepoInfo(repo: string) {
         // https://api.github.com/repos/ujjwalguptaofficial/fortjs
-        return request.get(`https://api.github.com/repos/${repo}`);
+        return await request.get(`https://api.github.com/repos/${repo}`);
     }
     static async downloadRepo(repo: string, tag: string = "latest"): Promise<string> {
-        const repoInforesponse = await Github.getRepoInfo(repo);
+        let repoInforesponse;
+        try {
+            Spinner.start("fetching app info from github");
+            repoInforesponse = await Github.getRepoInfo(repo);
+            Logger.debug("repoInfo", repoInforesponse.data);
+        } catch (error) {
+            throw `Unable to fetch github repo information for repo ${repo}`;
+        }
         if (repoInforesponse.status === 200 || repoInforesponse.status === 201) {
-            let response = await request.get(`https://api.github.com/repos/${repo}/releases/${tag}`);
+            const releaseUrl = `https://api.github.com/repos/${repo}/releases/${tag}`;
+            Logger.debug('releaseUrl', releaseUrl);
+            let response = await request.get(releaseUrl);
             Logger.debug("release", response.data);
             if (response.status === 200) {
                 const tarBallUrl = response.data["zipball_url"];
@@ -41,6 +50,9 @@ export class Github {
                         reject();
                     })
                 })
+            }
+            else if (response.status === 404) {
+                throw new Error(`No release found for repo ${repo}`);
             }
         }
         else {
