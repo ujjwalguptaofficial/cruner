@@ -16,6 +16,9 @@ export class Spinner {
     }
 
     static fail(message?: string) {
-        oraInstance.fail(message);
+        if (oraInstance) {
+            oraInstance.fail(message);
+        }
+
     }
 }

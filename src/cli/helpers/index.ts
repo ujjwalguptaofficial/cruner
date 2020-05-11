@@ -5,3 +5,5 @@ export * from "./is_app_installed";
 export * from "./is_args_supplied";
 export * from "./ensure_dir";
 export * from "./get_app_info";
+export * from "./remove_app";
+export * from "./exit_app";

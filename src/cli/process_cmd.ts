@@ -1,7 +1,8 @@
-import { addApp, isArgsSupplied } from "./helpers";
+import { addApp, isAppInstalled, removeApp } from "./helpers";
 import { COMMAND_RESULT } from "./enums/index";
 import { Command } from "commander";
 import { Logger } from "../commons";
+import { Spinner } from "./helpers/spinner";
 export async function processCommand(program, shouldExecute = false) {
     if (program.add) {
         if (shouldExecute) {
@@ -10,7 +11,18 @@ export async function processCommand(program, shouldExecute = false) {
     }
     else if (program.remove) {
         if (shouldExecute) {
-            await addApp(program.add);
+            const appName = program.remove;
+            Spinner.start("Checking if app installed")
+            const isProvidedAppInstalled = await isAppInstalled(appName);
+            if (isProvidedAppInstalled) {
+                Spinner.succeed();
+                Spinner.start("Removing app")
+                await removeApp(program.remove);
+                Spinner.succeed();
+            }
+            else {
+                Logger.log(`App ${appName} is not installed`);
+            }
         }
     }
     else {
