@@ -3,11 +3,10 @@ import { join } from "path";
 import { Github } from "./github";
 import { Config } from "../config";
 import { ensureDir } from "./ensure_dir";
-import { Parse } from "unzipper";
 import { IAppInfo } from "../interfaces";
 import { getAppInfo } from "./get_app_info";
 import { chmod } from "fs-extra";
-import { Logger } from "../../commons";
+import { Logger, isCmdExist } from "../../commons";
 import { Spinner } from "./spinner";
 import * as semver from "semver";
 import { removeApp } from "./remove_app";
@@ -17,60 +16,55 @@ export const addApp = async (url: string) => {
 
     if (url.includes("github")) {
         try {
-            let shouldInstall = true;
+
             const repo = url.split("https://github.com/")[1];
             const repoSplittedBySlash = repo.split("/");
             const installDir = Config.installDir;
-            const appName = repoSplittedBySlash[repoSplittedBySlash.length - 1];
-            const appinstallDir = join(installDir, appName);
+
             // const appBinDir = join(Config.binDir, appName);
-            const installedAppInfo = await getAppInfo(appinstallDir);
-            const path = await Github.downloadRepo(repo, async (info) => {
-                const isPathExist = await pathExists(appinstallDir);
-                if (isPathExist) {
-                    Logger.debug("app exist");
-                    // if installing version is less than installed version
-                    if (semver.lte(info.tag_name, installedAppInfo.version)) {
-                        shouldInstall = false;
-                    }
-                    else {
-                        await removeApp(appName);
-                        Logger.debug("Installed app removed")
-                    }
-                }
-                return shouldInstall;
+
+            const downloadDir = await Github.downloadRepo(repo, async (info) => {
+                return true;
             });
-            if (!shouldInstall) {
-                process.exit();
-                return;
+
+            const downloadAppInfo = await getAppInfo(downloadDir);
+            const appName = downloadAppInfo.name;
+            const appinstallDir = join(installDir, appName);
+            const isPathExist = await pathExists(appinstallDir);
+            if (isPathExist) {
+                Logger.debug("app exist");
+                const installedAppInfo = await getAppInfo(appinstallDir);
+
+                // if cmd doesn't exist which means there was some problem while installing app
+                if (isCmdExist(downloadAppInfo.name)) {
+                    await removeApp(appName);
+                }
+                // if installing version is less than installed version
+                else if (semver.lte(downloadAppInfo.version, installedAppInfo.version)) {
+                    Logger.log("Skipping install - App is already installed & provided version is less than or equal to installed app version.");
+                    return exitApp();
+                }
+                else {
+                    await removeApp(appName);
+                }
             }
-            Logger.debug("download path", path);
+            Logger.debug("download path", downloadDir);
             Spinner.start('Installing app');
 
             Logger.debug("Config.installDir", installDir, 'exec path', process.execPath);
             await ensureDir(installDir);
 
             await ensureDir(appinstallDir);
-
-            const zip = createReadStream(path as string)
-                .pipe(Parse({ forceStream: true }));
-
-            for await (const entry of zip) {
-                const split = entry.path.split("/");
-                split.shift();
-                const path = join(appinstallDir, split.join("/"));
-                if (entry.type === "File") {
-                    entry.pipe(createWriteStream(path))
-                    //.promise();
+            await copy(downloadDir, appinstallDir);
+            await createSoftLink(appinstallDir, (isCreated) => {
+                if (isCreated) {
+                    Spinner.succeed();
+                    Logger.log("App Installed successfully");
                 }
                 else {
-                    await ensureDir(path);
+                    Spinner.fail();
                 }
-            }
-
-            await createSoftLink(installedAppInfo, appinstallDir)
-            Spinner.succeed();
-            Logger.log("App Installed successfully");
+            })
         }
         catch (error) {
             Logger.debug("error", error);
@@ -99,9 +93,17 @@ export const addApp = async (url: string) => {
                 }
                 await copy(pathOfCrunerApp, installDir);
                 Logger.debug("application copied");
-                await createSoftLink(packageInfo, installDir);
-                Spinner.succeed();
-                Logger.log("App Installed successfully");
+                await createSoftLink(installDir, (isCreated) => {
+                    if (isCreated) {
+                        Spinner.succeed();
+                        Logger.log("App Installed successfully");
+                    }
+                    else {
+                        Spinner.fail();
+                    }
+
+                });
+
             } catch (error) {
                 Logger.debug("error", error);
                 Spinner.fail(error.message || "error occured while installing app form github");
@@ -117,7 +119,8 @@ export const addApp = async (url: string) => {
     }
 }
 
-async function createSoftLink(appInfo: IAppInfo, appinstallDir: string) {
+async function createSoftLink(appinstallDir: string, onCreated: (isCreated: boolean) => void) {
+    const appInfo = await getAppInfo(appinstallDir);
     const source = join(appinstallDir, appInfo.main);
     Logger.debug("source", source);
     const commandLocation = join(Config.binDir, appInfo.name);
@@ -125,7 +128,8 @@ async function createSoftLink(appInfo: IAppInfo, appinstallDir: string) {
     const isSymLinkExist = await pathExists(commandLocation);
     const isSourceExist = await pathExists(source);
     if (isSourceExist === false) {
-        Logger.log(`App main '${appInfo.main}' doesn't exist.`);
+        onCreated(false);
+        Logger.error(`App main '${appInfo.main}' doesn't exist.`);
         return exitApp();
     }
     if (isSymLinkExist === false) {
@@ -134,4 +138,5 @@ async function createSoftLink(appInfo: IAppInfo, appinstallDir: string) {
         Logger.debug("symlink created")
     }
     await chmod(commandLocation, "755");
+    onCreated(true);;
 }

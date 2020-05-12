@@ -5,6 +5,10 @@ export class Logger {
         console.log(...messages);
     }
 
+    static error(...messages) {
+        console.log('\x1b[33m%s\x1b[0m',...messages);
+    }
+
     static debug(...messages) {
 
         if (loggerType === "verbose" || loggerType === "debug") {

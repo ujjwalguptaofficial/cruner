@@ -1,11 +1,13 @@
 import Axios from "axios";
-import { createWriteStream } from "fs-extra";
+import { createWriteStream, createReadStream } from "fs-extra";
 const ProgressBar = require('progress');
 import { tmpdir } from "os";
-import * as Path from "path";
-import { Logger } from "../../commons";
+import { join, resolve } from "path";
+import { Logger, getUniqId } from "../../commons";
 import { Spinner } from "./spinner";
 import { IGitHubRepoReleaseInfo } from "../interfaces";
+import { Parse } from "unzipper";
+import { ensureDir } from "./ensure_dir";
 
 const request = Axios.create({
     validateStatus: function (status) {
@@ -33,31 +35,47 @@ export class Github {
             let response = await request.get(releaseUrl);
             Logger.debug("release", response.data);
             if (response.status === 200) {
-                const shouldInstall = await onInfoFetched(response.data);
-                if (!shouldInstall) {
-                    Spinner.succeed();
-                    Logger.log("Skipping install - App is already installed & provided version is less than or equal to installed app version.")
-                    return;
-                }
+                // const shouldInstall = await onInfoFetched(response.data);
+                // if (!shouldInstall) {
+                //     Spinner.succeed();
+                //     Logger.log("Skipping install - App is already installed & provided version is less than or equal to installed app version.")
+                //     return;
+                // }
                 const tarBallUrl = response.data["zipball_url"];
                 Spinner.start('Downloading app');
                 const { data, headers } = await Axios.get(tarBallUrl, {
                     responseType: 'stream'
                 })
                 const totalLength = headers['content-length'];
-                const fileDownloadPath = Path.resolve(tmpdir(), headers["content-disposition"].split(";")[1].split("=")[1]);
+                const fileDownloadPath = resolve(tmpdir(), headers["content-disposition"].split(";")[1].split("=")[1]);
                 const writer = createWriteStream(fileDownloadPath);
                 data.pipe(writer);
-                return new Promise((resolve, reject) => {
+                await new Promise((resolve, reject) => {
                     writer.on('finish', () => {
                         Spinner.succeed();
-                        resolve(fileDownloadPath);
+                        resolve();
                     })
                     writer.on('error', () => {
                         Spinner.fail();
                         reject();
                     })
                 })
+                const zip = createReadStream(fileDownloadPath)
+                    .pipe(Parse({ forceStream: true }));
+                const extractPath = resolve(tmpdir(), getUniqId());
+                for await (const entry of zip) {
+                    const split = entry.path.split("/");
+                    split.shift();
+                    const path = join(extractPath, split.join("/"));
+                    if (entry.type === "File") {
+                        entry.pipe(createWriteStream(path))
+                        //.promise();
+                    }
+                    else {
+                        await ensureDir(path);
+                    }
+                }
+                return extractPath;
             }
             else if (response.status === 404) {
                 throw new Error(`No release found for repo ${repo}`);
